@@ -9,7 +9,7 @@ práctico necesitamos aprender un nuevo lenguaje de programación
 llamado Rust. Este lenguaje resulta muy apropiado para nuestros
 propósitos por su gran cercanía con los conceptos que estudiaremos.
 
-Rust en un lenguaje fácil de aprender y muy poderoso. En pocas semanas
+Rust es un lenguaje fácil de aprender y muy poderoso. En pocas semanas
 estarás programando en este lenguaje.
 
 Propósito de aprendizaje
@@ -56,15 +56,17 @@ Te voy a dejar unos videos de ayuda:
 Ejercicio 2: instala las herramientas 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Abren la terminal y ejecuta los comandos:
+
+
+Ejercicio 3: Herramientas
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Antes que nada, en la terminal ejecuta los comandos:
 
 .. code-block:: bash
 
     $ sudo apt update
     $ sudo apt upgrade
-
-Ejercicio 3: Herramientas
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Para programar en Rust recomiendo instalar:
 
@@ -80,17 +82,19 @@ algo no me funciona lo pruebo con Eclipse.
 Rustup es un instalador de Rust y administrador de paquetes, para instalarlo en Linux
 puedes correr el siguiente comando en la terminal:
 
-.. code-block::bash
+.. code-block:: bash
+
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 *Elegimos la instalación por defecto,* 1
 
-.. image:: magnetic-balls.jpg
-   :width: 40pt
+.. image:: \../_static/unidad_1/rust_default_install.png
+   :width: 400pt
 
 También necesitaremos instalar cargo
 
-.. code-block::bash
+.. code-block:: bash
+
     apt install cargo
 
 cargo es un administrador de paquetes que nos permitirá
@@ -98,10 +102,12 @@ instalar librerías, en Rust las librerías son llamadas *crates.*
 
 Para comprobar que Rust y Cargo fueron instalados correctamente podemos probar con el siguiente comando:
 
-.. code-block::bash
+.. code-block:: bash
+
     rustc --version
 
-.. code-block::bash
+.. code-block:: bash
+
     cargo --version
 
 Ejercicio 4: línea de comandos
