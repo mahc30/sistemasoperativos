@@ -1,2 +1,2 @@
-# sistemasoperativos
-repo for operating systems course in UPB
+# Sistemas Operativos
+Repo for Operating Systems examples in Rust

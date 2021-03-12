@@ -1,4 +1,4 @@
-Unidad 1: Lenguaje C
+Unidad 1: Rust
 =======================
 
 Introducción
@@ -6,16 +6,16 @@ Introducción
 
 Para poder abordar el curso de sistemas operativos con un enfoque
 práctico necesitamos aprender un nuevo lenguaje de programación
-llamado lenguaje C. Este lenguaje resulta muy apropiado para nuestros
+llamado Rust. Este lenguaje resulta muy apropiado para nuestros
 propósitos por su gran cercanía con los conceptos que estudiaremos.
 
-C en un lenguaje fácil de aprender y muy poderoso. En pocas semanas
+Rust en un lenguaje fácil de aprender y muy poderoso. En pocas semanas
 estarás programando en este lenguaje.
 
 Propósito de aprendizaje
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Aplicar el lenguaje de programación C en la solución de problemas
+Aplicar el lenguaje de programación Rust en la solución de problemas
 simples haciendo uso de variables, estructuras de control, punteros,
 estructuras de datos, funciones y archivo.
 
@@ -23,7 +23,7 @@ estructuras de datos, funciones y archivo.
 Trayecto de actividades
 ------------------------
 
-Ejercicio 1: entorno de trabajo
+Ejercicio 1: Entorno de Trabajo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Para poder trabajar en los ejercicios vas
@@ -62,42 +62,69 @@ Abren la terminal y ejecuta los comandos:
 
     $ sudo apt update
     $ sudo apt upgrade
-    $ sudo apt install build-essential
-    $ sudo apt install gdb
 
-Ejercicio 3: instala un par de entornos de desarrollo
+Ejercicio 3: Herramientas
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Para el curso te recomiendo que instales dos entornos de desarrollo:
+Para programar en Rust recomiendo instalar:
 
 #. Eclipse
 #. Visual Studio Code
+#. Rustup
 
 Eclipse te permitirá tener un depurador visual de código, pero la verdad
-es un poco lento. Visual Studio, no tiene un depurador visual tan rico, pero es
+es un poco lento. Visual Studio Code, no tiene un depurador visual tan rico, pero es
 muy liviano. Yo uso ambos. Normalmente trabajo con Visual Studio Code y cuando
 algo no me funciona lo pruebo con Eclipse.
+
+Rustup es un instalador de Rust y administrador de paquetes, para instalarlo en Linux
+puedes correr el siguiente comando en la terminal:
+
+.. code-block::bash
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+*Elegimos la instalación por defecto,* 1
+
+.. image:: magnetic-balls.jpg
+   :width: 40pt
+
+También necesitaremos instalar cargo
+
+.. code-block::bash
+    apt install cargo
+
+cargo es un administrador de paquetes que nos permitirá
+instalar librerías, en Rust las librerías son llamadas *crates.*
+
+Para comprobar que Rust y Cargo fueron instalados correctamente podemos probar con el siguiente comando:
+
+.. code-block::bash
+    rustc --version
+
+.. code-block::bash
+    cargo --version
 
 Ejercicio 4: línea de comandos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Explorando un poco más la línea de comandos, disponible en casi todos los sistemas operativos. 
-Para ello te propongo realizar la siguiente
+Para ello te propongo realizar la siguiente guía:
 `guía <https://drive.google.com/open?id=11tTtbCuVjYcBBYPrULbCeb0PABJLyhGEtzRGKMRG5u0>`__.
 
-Ejercicio 5: lenguaje de programación C
+
+Ejercicio 5: lenguaje de programación Rust
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 En esta unidad vamos a aprender un nuevo lenguaje de programación, es simple 
 pero muy poderoso. En este 
 `enlace <https://drive.google.com/file/d/1wiyBZL0kf1cQekHPfa7URcOxSpnfKE7-/view?usp=sharing>`__
-encontrarás una guía básica del lenguaje C.
+encontrarás una guía básica de Rust.
 
 .. note::
     ¡Alerta de Spoiler!
 
     En este `enlace <https://drive.google.com/file/d/174GYcz_in94R_z6NklA02yzmsj3OuD5f/view?usp=sharing>`__
-    , se encuentra la solución a algunos puntos de la guía introductoria a C (ojo, no todos). 
+    , se encuentra la solución a algunos puntos de la guía introductoria a Rust (ojo, no todos). 
     Te recomiendo hacer los ejercicios sin recurrir a la solución.
 
 Ejercicio 6: continuemos estudiando C

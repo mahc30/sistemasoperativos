@@ -1,19 +1,16 @@
-Curso Sistemas Operativos 2021-10
+Sistemas Operativos
 ========================================
 
-Docente diseñador del curso: Juan Fernando Franco Higuita
-
-Nombre del docente moderador: Juan Fernando Franco Higuita
-
-Créditos y horas totales del curso: 3 créditos - 144 horas totales
+Autor: Miguel Ángel Hincapié Calle
+Clone en Rust de https://sistemasoperativos.readthedocs.io/es/latest/
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contenidos semanales:
+   :caption: Contenidos:
 
-   Introducción al curso <_intro/intro>
-   Unidad 1: Lenguaje C <_unidad1/unidad1>
-   Unidad 2: Procesos e hilos <_unidad2/unidad2>
-   Unidad 3: Comunicación y sincronización <_unidad3/unidad3>
+   Introducción Al curso <_intro/intro>
+   Unidad 1: Lenguaje Rust <_unidad1/unidad1>
+   Unidad 2: Procesos https://sistemasoperativos.readthedocs.io/es/latest/e Hilos <_unidad2/unidad2>
+   Unidad 3: Comunicación y Sincronización <_unidad3/unidad3>
    Unidad 4: Entrada-Salida <_unidad4/unidad4>
 
