@@ -14,4 +14,5 @@ Clone en Rust de https://sistemasoperativos.readthedocs.io/es/latest/
    Unidad 2: Procesos Hilos <_unidad2/unidad2>
    Unidad 3: Comunicación y Sincronización <_unidad3/unidad3>
    Unidad 4: Entrada-Salida <_unidad4/unidad4>
+   Guías <_guias/guias>
 

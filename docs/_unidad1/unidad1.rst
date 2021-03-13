@@ -72,12 +72,18 @@ Para programar en Rust recomiendo instalar:
 
 #. Eclipse
 #. Visual Studio Code
+#. Extensión de Rust en Visual Studio Code
 #. Rustup
 
 Eclipse te permitirá tener un depurador visual de código, pero la verdad
 es un poco lento. Visual Studio Code, no tiene un depurador visual tan rico, pero es
 muy liviano. Yo uso ambos. Normalmente trabajo con Visual Studio Code y cuando
 algo no me funciona lo pruebo con Eclipse.
+
+En Visual Studio Code podemos instalar la extensión de Rust, nos ayudará a programar en Rust
+con snippets, autocompletado y muchas otras funciones.
+
+.. image:: \../_static/unidad_1/rust_vscode_extension.png
 
 Rustup es un instalador de Rust y administrador de paquetes, para instalarlo en Linux
 puedes correr el siguiente comando en la terminal:
@@ -100,7 +106,7 @@ También necesitaremos instalar cargo
 cargo es un administrador de paquetes que nos permitirá
 instalar librerías, en Rust las librerías son llamadas *crates.*
 
-Para comprobar que Rust y Cargo fueron instalados correctamente podemos probar con el siguiente comando:
+Para comprobar que Rust y Cargo fueron instalados correctamente podemos usar el siguiente comando:
 
 .. code-block:: bash
 
@@ -114,8 +120,7 @@ Ejercicio 4: línea de comandos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Explorando un poco más la línea de comandos, disponible en casi todos los sistemas operativos. 
-Para ello te propongo realizar la siguiente guía:
-`guía <https://drive.google.com/open?id=11tTtbCuVjYcBBYPrULbCeb0PABJLyhGEtzRGKMRG5u0>`__.
+Para ello te propongo realizar la siguiente `guía <https://drive.google.com/open?id=11tTtbCuVjYcBBYPrULbCeb0PABJLyhGEtzRGKMRG5u0>`__.
 
 
 Ejercicio 5: lenguaje de programación Rust
