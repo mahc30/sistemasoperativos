@@ -100,7 +100,7 @@ También necesitaremos instalar cargo
 cargo es un administrador de paquetes que nos permitirá
 instalar librerías, en Rust las librerías son llamadas *crates.*
 
-Para comprobar que Rust y Cargo fueron instalados correctamente podemos probar con el siguiente comando:
+Para comprobar que Rust y Cargo fueron instalados correctamente podemos usar el siguiente comando:
 
 .. code-block:: bash
 
