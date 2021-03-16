@@ -53,12 +53,8 @@ Te voy a dejar unos videos de ayuda:
   de instalación. Una vez termines de instalar Linux en la USB grande, NO OLVIDES desconectar la USB
   pequeña para que tu computador inicie con la versión instalada de Linux en la USB grande.
 
-Ejercicio 2: instala las herramientas 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-
-
-Ejercicio 3: Herramientas
+Ejercicio 2: Herramientas
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Antes que nada, en la terminal ejecuta los comandos:
@@ -97,13 +93,13 @@ puedes correr el siguiente comando en la terminal:
 .. image:: \../_static/unidad_1/rust_default_install.png
    :width: 400pt
 
-También necesitaremos instalar cargo
+También necesitaremos instalar cargo.
 
 .. code-block:: bash
 
     apt install cargo
 
-cargo es un administrador de paquetes que nos permitirá
+Cargo es un administrador de paquetes que nos permitirá
 instalar librerías, en Rust las librerías son llamadas *crates.*
 
 Para comprobar que Rust y Cargo fueron instalados correctamente podemos usar el siguiente comando:
@@ -127,8 +123,7 @@ Ejercicio 5: lenguaje de programación Rust
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 En esta unidad vamos a aprender un nuevo lenguaje de programación, es simple 
-pero muy poderoso. En este 
-`enlace <https://drive.google.com/file/d/1wiyBZL0kf1cQekHPfa7URcOxSpnfKE7-/view?usp=sharing>`__
+pero muy poderoso. En este :doc:`enlace <../_guias/guias>` 
 encontrarás una guía básica de Rust.
 
 .. note::
@@ -138,10 +133,10 @@ encontrarás una guía básica de Rust.
     , se encuentra la solución a algunos puntos de la guía introductoria a Rust (ojo, no todos). 
     Te recomiendo hacer los ejercicios sin recurrir a la solución.
 
-Ejercicio 6: continuemos estudiando C
+Ejercicio 6: continuemos estudiando Rust
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Primero te voy a proponer que hagas dos guía para que trabajes los conceptos
+Primero te voy a proponer que hagas dos guías para que trabajes los conceptos
 básicos y luego una serie de ejercicios que te permitirán practicar varias
 de las cosas que has hecho hasta ahora.
 
