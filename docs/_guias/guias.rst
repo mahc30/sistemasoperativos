@@ -224,14 +224,368 @@ te invito a que consultes cuanto ocupa un char en Rust y respondas la siguiente 
 
 - ¿Cuántos bytes ocuparía si en lugar de ``i32`` fuera ``char``?
 
-Operadores
-^^^^^^^^^^^^^^
+Funciones y Loops
+^^^^^^^^^^^^^^^^^^^^^^
+Tomate un momento para analizar la siguiente función, es una implementación de
+un bubble sort para ordenar un vector.
 
-Loops
-^^^^^^^^^^^^^^
+- ¿Qué palabra se usa para declarar una función?
+- ¿Cuántos parametros toma la función?
+- ¿Cómo se llaman los parámetros y qué tipos de datos son?
+- ¿Cuál parámetro utilizamos para definir el rango de los ciclos for?
+- ¿Al finalizar la función, el vector quedaría ordenado de forma ascendente o descendente?
 
-Funciones
+.. code-block:: rust
+
+    fn sort(arr: &mut Vec<i32>, len: usize) {
+        for i in 0..len {
+            
+            for j in 0..len {
+                if es_mayor(arr[j], arr[i]) {
+                    
+                    //Swap
+                    let temp: i32 = arr[i];
+                    arr[i] = arr[j];
+                    arr[j] = temp;
+                }
+            }
+        }
+    }
+
+En el ejemplo hay un símbolo que no habíamos visto, el ``&`` indica que 
+esta variable es un ``apuntador``. Un apuntador es un tipo de dato que representa
+una dirección en la memoria, en este caso, significa que
+el parámetro ``arr`` no guarda un ``Vec<i32>`` si no que guarda la **dirección**
+en memoria en que se encuentra.
+
+Más adelante estudiaremos mejor los apuntadores, pero por el momento solo tienes que saber que ``&`` indica que esa 
+variable guarda una dirección en memoria, en Rust no es común utilizar directamente 
+el ``&`` porque el lenguaje tiene muchos métodos que nos ayudan a manipular la memoria de forma segura. 
+
+Entrada y Salida
+^^^^^^^^^^^^^^^^^^^
+
+Cuando necesitamos obtener input del usuario, tenemos que importar la librería ``io`` (input/output).
+Solo tenemos que importar la librería con ``use`` y ya podremos acceder a todas sus funciones con ``::``. Mira el siguiente ejemplo:
+
+.. code-block:: rust
+    
+    use std::io;
+
+    fn main() {    
+        println!("Escriba algo: ");
+        let mut input : String = String::new();
+        io::stdin().read_line(&mut input).expect("Failed to read");
+        println!("Usted escribió: {}", input);
+    }
+
+Tenemos un String mutable "input" que usaremos para guardar lo que escriba el usuario por consola, presta atención a cómo lo inicializamos en la misma
+línea, usamos ``::`` para acceder al método ``new()`` de ``String``, la sintaxis del ``::`` se usa para indicar que una función está asociada al tipo 
+``String`` más que a una instancia en particular, en algunos lenguajes a esto se le llaman métodos estáticos.
+
+En resumen, en este punto la variable mutable ``input`` está asociado a una instancia vacía de ``String``.
+
+En la siguiente linea, del mismo modo llamamos al método ``stdin()`` de ``io``. Esto nos retorna una instancia de ``stdin()`` de la cuál podemos 
+invocar el método ``read_line(&mut input)``. El trabajo de ``read_line`` es tomar cualquier entrada que escriba el usuario y copiarlo en un String,
+por lo tanto toma como argumento un String, además el String tiene que ser mutable para que la función pueda cambiar su contenido.
+
+Mira que pasamos como argumento un **apuntador** o **referencia** a ``input``, el ``&`` nos permite acceder a un mismo dato desde diferentes partes
+de nuestro programa sin necesidad de copiar todos los datos varias veces. Cuando estudiemos el concepto de *Ownership* en Rust hablaremos más de esto.
+
+Cargo
+^^^^^^^^^
+
+Hasta ahora no hemos tenido la necesidad de utilizar ``cargo``, el administrador de paquetes de Rust, que nos permite usar librerías 
+externas, usualmente desarrolladas por la comunidad.
+
+Para comprobar que tienes cargo instalado usa el comando 
+
+.. code-block:: bash
+    
+    cargo --version
+
+Si aún no lo has instalado, en la :doc:`unidad 1 <../_unidad1/unidad1>`  hay instrucciones de como instalarlo.
+
+Cargo nos facilita todo el proceso de crear, organizar, compilar y correr un proyecto de Rust. Es muy sencillo:
+
+Para crear un nuevo proyecto:
+
+.. code-block:: bash
+    
+    cargo new <nombre_del_proyecto>
+
+Para compilar o 'construir' el proyecto
+
+.. code-block:: bash
+    
+    cargo build
+
+Para correr el proyecto, este comando también construye el proyecto automáticamente.
+
+.. code-block:: bash
+    
+    cargo run
+
+Apuntadores
+^^^^^^^^^^^^
+
+En algunos de los ejemplos anteriores ya tuvimos un acercamiento a lo que son los apuntadores, un apuntador es una variable que contiene la dirección de
+una variable.
+
++------------+------------+
+|  Dirección |            |
++============+============+
+|     0      |     10     |
++------------+------------+
+|     4      |     11     |
++------------+------------+
+|     8      |     12     |
++------------+------------+
+|     12     |     13     |
++------------+------------+
+|     16     |     4      |
++------------+------------+
+
+- La variable var1 está asociada a la dirección 4 de la memoria.
+- Considere que var1 es un entero de 4 bytes, por lo tanto var1 = 11.
+- pvar1 es apuntador a variables de tipo entero de 4 bytes.
+- pvar1 puede almacenar la dirección var1.
+- pvar1 está asociada a la posición de memoria 16 y las direcciones son de 4 bytes.
+- Si pvar1 apunta a var1, quiere decir que el contenido de la variable pvar1 (la posición 16 de memoria) es 4, ya que 4 es la dirección de var1.
+
+**¿Cómo se declara un apuntador?**
+
+Se utiliza el operador ``*``.
+
+.. code-block:: rust
+
+    let var1 = 11;
+    
+    let pvar1 : *mut i32;
+
+Quiere decir que pvar1 es una variable que almacenará direcciones de variables de tipo i32.
+
++------------+------------+
+|  Dirección |            |
++============+============+
+|     0      |     10     |
++------------+------------+
+|  4 (var1)  |     11     |
++------------+------------+
+|     8      |     12     |
++------------+------------+
+|     12     |     13     |
++------------+------------+
+| 16 (pvar1) |     4      |
++------------+------------+
+
+
+**¿Cómo se obtiene la dirección de una variable?**
+
+Se utiliza el operador ``&``.
+
+.. code-block:: rust
+
+    let var1: i32 = 11;
+    let var2: i32 = 12;
+
+    let pvar1 : *const i32 = &var1;
+    let pvar2 : *mut i32;
+
++------------+------------+
+|  Dirección |            |
++============+============+
+|     0      |     10     |
++------------+------------+
+|  4 (var1)  |     11     |
++------------+------------+
+|  8 (var2)  |     12     |
++------------+------------+
+| 12 (pvar2) |     13     |
++------------+------------+
+| 16 (pvar1) |     4      |
++------------+------------+
+
+- ¿Cómo obtener la dirección de var2 y almacenarla en pvar2?
+- ¿Cómo se almacena el contenido de pvar2 en pvar1?
+
+|
+| **¿Cómo leer y escribir el contenido de la dirección que está almacenada en el apuntador?**
+
+.. code-block:: rust
+
+    let x = 1;
+    let y = 2;
+    let px: *const i32;
+
+    px = &x;
+
++------------+------------+
+|  Dirección |            |
++============+============+
+|     0      |            |
++------------+------------+
+|**4** (var1)|     1      |
++------------+------------+
+|  8 (var2)  |     2      |
++------------+------------+
+| 12 (pvar2) |   **4**    |
++------------+------------+
+
+**px almacena la dirección de x**
+
+.. code-block:: rust
+
+    let mut x = 1;
+    let mut y = 2;
+    let px;
+
+    println!("x {} y {}", x, y);
+
+    px = &mut x;
+    *px = 0;
+
+    y = *px;
+
+    println!("y {} *px {}",y, *px);
+
++------------+------------+
+|  Dirección |            |
++============+============+
+|     0      |            |
++------------+------------+
+|**4** (var1)|     1      |
++------------+------------+
+|  8 (var2)  |     2      |
++------------+------------+
+| 12 (pvar2) |   **4**    |
++------------+------------+
+
+- ¿Cómo se podría almacenar en la posición de memoria 8 el valor almacenado en la posición de memoria 4 utilizando px?
+
+.. code-block:: rust
+
+    let mut x = 1;
+    let px;
+
+    px = &mut x;
+
++------------+------------+
+|  Dirección |            |
++============+============+
+|     0      |            |
++------------+------------+
+|**4** (x)   |     0      |
++------------+------------+
+|  8 (y)     |     0      |
++------------+------------+
+| 12 (px)    |     4      |
++------------+------------+
+
+.. code-block:: rust
+    
+    let mut x = 1;
+    let px;
+
+    px = &mut x;
+    px = px + 1; //Ojo, no podemos sumar a un apuntador así porque si, esto es solo por el contexto del ejemplo.
+    *px = 5;
+
++------------+------------+
+|  Dirección |            |
++============+============+
+|     0      |            |
++------------+------------+
+|**4** (x)   |     1      |
++------------+------------+
+|  8 (y)     |     5      |
++------------+------------+
+| 12 (px)    |     8      |
++------------+------------+
+
+- ¿Qué ocurre si ahora hacemos esto?
+
+.. code-block:: rust
+
+    px = px - 1;
+    *px = 5;
+
+------------------------
+
+**Ejercicio**
+
+Suponga que se tienen las siguientes instrucciones. Cuando se realizo la declaración de las variables se
+asignaron las direcciones para cada variable tal y como se muestra en la figura. 
+¿Cuáles son los valores finales de las variables después de la ejecución de las instrucciones?
+
+.. image:: \../_static/guias/pointers_2.png
+
+.. image:: \../_static/guias/pointers_1.png
+
+---------------------
+
+***Ejercicio**
+
+.. image:: \../_static/guias/pointers_3.png
+
+Queremos hacer una función que intercambie el contenido de dos variables.
+Al ejecutar el programa anterior este es el resultado:
+
+.. image:: \../_static/guias/pointers_3_result.png
+
+¿Qué salió mal? En C los parámetros de una función se pasan por valor. 
+Al llamar swap(x,y), se pasan en el stack los números 1 y 2.
+
+- ¿Qué es el **stack**?
+- El programa anterior al compilarse genera varios warnings ¿Qué dicen estos mensajes?
+
+--------------------------------
+
+.. image:: \../_static/guias/pointers_4.png
+
+Al ejecutar el programa este es el resultado:
+
+.. image:: \../_static/guias/pointers_4_result.png
+
+El programa funciona correctamente. En este caso estamos pasando a swap la dirección de las variables x, y. 
+A esto se le conoce como paso de parámetros por referencia.
+
+-----------------------------------------------
+
+.. image:: \../_static/guias/pointers_3_edit.png
+
+.. image:: \../_static/guias/pointers_4_edit.png
+
+Analice y compare los códigos en los cuales los llamados a
+funciones fueron hechos por valor y por referencia y responda las
+siguientes preguntas:
+
+- ¿Por qué cuando se hace el llamado por referencia en la función se pasan los parámetros con ``&mut``?
+- Suponga que en la línea 12 (del programa de más arriba) se introduce la siguiente instrucción
+
+.. code-block:: rust
+
+    let p = &mut y; 
+
+La invocación (resaltada en el cuadro azul) se puede reemplazar por:
+
+- a.swap(x,*p);
+- b.swap(x,&p);
+- c.swap(x,p);
+- d.Ninguna de las anteriores.
+
+----------------------------------
+
+- Compile el código mostrado a continuación. Si este presenta errores corríjalos. Explique brevemente por que ocurren estos errores.
+- Ejecute el programa, observe la salida y diga el por que se observa esta.
+
+.. image:: \../_static/guias/pointers_5.png
+
+Arreglos
 ^^^^^^^^^^^^
 
 Ownership
-^^^^^^^^^^^^^^
+^^^^^^^^^^^^
+
+El concepto de Ownership es uno de los elementos que más se destacan en Rust, es lo que le permite a Rust
+hacer un manejo seguro de la memoria sin utilizar garbage collector,
