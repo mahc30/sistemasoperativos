@@ -475,7 +475,7 @@ Se utiliza el operador ``&``.
 +============+============+
 |     0      |            |
 +------------+------------+
-|**4** (x)   |     0      |
+|  4 (x)     |     0      |
 +------------+------------+
 |  8 (y)     |     0      |
 +------------+------------+
@@ -583,6 +583,105 @@ La invocación (resaltada en el cuadro azul) se puede reemplazar por:
 
 Arreglos
 ^^^^^^^^^^^^
+
+Considere:
+
+.. code-block:: rust
+    
+    fn main() {
+        let vec : [i32; 4] = [1,2,3,4];
+        let a = vec[0]; //a = 1
+        let a = &vec; // a = 1
+    }
+
++------------+------------+
+|  Dirección |            |
++============+============+
+| 0 (vec[0]) |     1      |
++------------+------------+
+| 4 (vec[1]) |     2      |
++------------+------------+
+| 8 (vec[2]) |     3      |
++------------+------------+
+| 12 (vec[3])|     4      |
++------------+------------+
+
+.. code-block:: rust
+    
+    fn main() {
+        let vec : [i32; 4] = [1,20,30,40];
+        let pvec = vec.as_ptr();
+
+        unsafe{
+            let a = *pvec.offset(1); // En C sería pvec + 1
+            let b = *pvec.add(1) + 1;
+        }
+    }
+
+- En el programa anterior, ¿Cuál es el valor de las variables a y b?
+
+.. code-block:: rust
+
+    fn main()
+    {
+
+        let mut arr: [i32; 6] = [2,3,1,0,9,6];
+
+        unsafe{
+
+            let mut ptr1 : *mut i32;
+    
+            let ptr2 : *mut i32 = arr.as_mut_ptr().add(5);
+
+            ptr1 = arr.as_ptr() as *mut i32; //Casteo explícito para indicar que el apuntador es variable
+    
+            ptr1 = ptr1.add(2);
+    
+            *ptr1 = 5;
+    
+            *ptr2.sub(1) = *ptr2.sub(1) - 1;
+
+            *(ptr2) = *ptr1 + *(ptr2.offset(-1))
+        }
+    }
+
+- ¿Cómo quedará el arreglo después de que se ejecutan las siguientes instrucciones?
+
+**Alimento para el pensamiento 1**
+
+Realice un programa que calcule el promedio de lo valores de un arreglo de 100 posiciones.
+
+Nota: El programa debe generar el arreglo automáticamente y luego llamar una función que calcule el promedio.
+
+Arreglos Multidimencionales
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Un arreglo multidimensional se puede entender como una arreglo de una dimensión cuyos elementos son arreglos.
+
+¿Cómo se almacena el arreglo “numeros” en memoria si los char ocupan 4 bytes?
+
+.. code-block:: rust
+
+    let nombres : [[char; 10]; 3] = [['F','u','l','a','n','o', '\0', '\0', '\0', '\0'], ['M','e','n','g','a','n','o', '\0', '\0', '\0'], ['P','e','r','a','n','o', '\0', '\0', '\0', '\0']];
+
++------------+------------+-----------+-----------+
+|            |            |           |           |
++============+============+===========+===========+
+|     0      |     'F'    |     28    |     0     |
++------------+------------+-----------+-----------+
+|     4      |     'u'    |     32    |     0     |
++------------+------------+-----------+-----------+
+|     8      |     'l'    |     36    |     0     |
++------------+------------+-----------+-----------+
+|     12     |     'a'    |     40    |    'M'    |
++------------+------------+-----------+-----------+
+|     16     |     'n'    |     44    |    'e'    |
++------------+------------+-----------+-----------+
+|     20     |     'o'    |     48    |    'n'    |
++------------+------------+-----------+-----------+
+|     24     |      0     |     52    |    'g'    |
++------------+------------+-----------+-----------+
+
 
 Ownership
 ^^^^^^^^^^^^
