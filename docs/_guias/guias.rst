@@ -841,7 +841,7 @@ cuando tenemos datos guardados en el heap, clonar los valores para una nueva var
 costoso y riesgoso, por esta razón es más eficiente **mover** los valores (apuntador, length, capacity) a la nueva variable,
 pues son datos que podemos encontrar en el stack.
 
-Todos los ejemplos de esta sección fueron tomados de https://doc.rust-lang.org/book/ch04-01-what-is-ownership.html
+Todos los ejemplos de esta sección fueron tomados y adaptados de https://doc.rust-lang.org/book/ch04-01-what-is-ownership.html
 
 **Alimento para el pensamiento 3**
 
