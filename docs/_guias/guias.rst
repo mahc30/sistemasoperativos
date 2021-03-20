@@ -742,9 +742,9 @@ La variable s es un string que es válido desde que es declarado hasta el final 
 
 Hasta el momento es muy común a la forma en que funcionan muchos de los otros lenguajes. 
 Esta forma de declarar literales es bastante conveniente y fácil de utilizar, pero tienen
-un pequeño problema, son inmutables, ¿Qué haríamos si quisieramos almacenar algo que escriba el usuario?
+un pequeño problema, son inmutables, ¿Qué haríamos si quisieramos almacenar una cadena que escriba el usuario?
 
-Para esto existen estructuras más complejas que las que hemos visto hasta el momento, como ``String``, 
+Para esto tendremos que usar estructuras más complejas que las que hemos visto hasta el momento, como ``String``, 
 que es un tipo que se asigna o guarda en el heap y por eso puede guardar datos que conoceremos solo en tiempo de ejecución.
 
 .. code-block:: rust
@@ -770,7 +770,7 @@ cantidad de memoria, desconocida al momento de compilar, para guardar estos dato
 
 Lo primero se logra cuando llamamos al ``String::from``, que en su implementación pide la memoria que necesita.
 
-Para lo segundo, Rust devuelve automáticamente la memoria cuando al sistema cuando la variable que la contiene
+Para lo segundo, Rust devuelve automáticamente la memoria al sistema cuando la variable que la contiene
 sale del scope.
 
 Veamos el siguiente ejemplo:
@@ -826,7 +826,7 @@ Intenta correr el siguiente código:
 - ¿Porqué no funcionó?
 
 Para solucionar este problema le debemos indicar explícitamente 
-que s2 **clone** la información del heap.
+a s2 que **clone** la información del heap a la que apunta s1.
 
 .. code-block:: rust
 
@@ -838,11 +838,11 @@ que s2 **clone** la información del heap.
 .. image:: \../_static/guias/string_3.svg
     :width: 800
 
-En resumen, cuando los valores de los datos están guardados en el stack significa que ya los conocemos en
+En resumen, los valores de los datos guardados en el stack ya los conocemos en
 tiempo de compilación y por lo tanto hacer copias de los valores es más fácil y rápido, por otro lado,
 cuando tenemos datos guardados en el heap, clonar los valores para una nueva variable puede ser bastante 
-costoso y riesgoso, por esta razón es más eficiente **mover** los valores (apuntador, length, capacity) a la nueva variable,
-pues son datos que podemos encontrar en el stack.
+costoso y riesgoso, por esta razón es más eficiente **mover** (así se le llama en Rust) los valores (apuntador, length, capacity) 
+a la nueva variable, pues son datos que podemos encontrar en el stack.
 
 Todos los ejemplos de esta sección fueron tomados y adaptados de https://doc.rust-lang.org/book/ch04-01-what-is-ownership.html
 
