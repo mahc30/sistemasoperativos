@@ -792,6 +792,7 @@ Veamos cómo funciona un ``String``. Este tipo está formado por 3 partes:
 - *capacity*: la cantidad de memoria total que ha recibido del sistema.
 
 .. image:: \../_static/guias/string_1.svg
+    :width: 800
 
 Cuando nosotros asignamos ``s1`` a ``s2``, copiamos la información del String, es decir,
 copiamos el apuntador, lenght y capacity que está en el **stack**, no la cadena de texto
@@ -802,6 +803,7 @@ Visualmente podemos verlo así:
 ``s2`` hace una copia del apuntador, length y capacity de ``s1``
 
 .. image:: \../_static/guias/string_2.svg
+    :width: 800
 
 Esto puede ser un problema, pues cuando ambas variables salgan del scope Rust intentará
 liberar la memoria de sus apuntadores, pero cómo ambas variables apuntan a la misma dirección
@@ -834,6 +836,7 @@ que s2 **clone** la información del heap.
     println!("s1 = {}, s2 = {}", s1, s2);
 
 .. image:: \../_static/guias/string_3.svg
+    :width: 800
 
 En resumen, cuando los valores de los datos están guardados en el stack significa que ya los conocemos en
 tiempo de compilación y por lo tanto hacer copias de los valores es más fácil y rápido, por otro lado,
