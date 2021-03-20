@@ -613,7 +613,7 @@ Considere:
         let pvec = vec.as_ptr();
 
         unsafe{
-            let a = *pvec.offset(1); // En C sería pvec + 1
+            let a = *pvec.offset(1);
             let b = *pvec.add(1) + 1;
         }
     }
@@ -646,6 +646,17 @@ Considere:
     }
 
 - ¿Cómo quedará el arreglo después de que se ejecutan las siguientes instrucciones?
+
+.. note::
+    
+    En los dos ejemplos anteriores hicimos algo de **aritmética de punteros** con las funciones
+    ``offset``, ``add`` y ``sub``. 
+    
+    Tanto en Rust como en C podemos manipular de forma libre, sin embargo, esto es muy propenso a errores y Rust no lo permite,
+    por eso tuvimos que escribir nuestro código dentro del bloque ``unsafe {}``, debemos evitar usarlo
+    lo más posible pues Rust nos da herramientas que nos permiten manipular la memoria de forma más segura. 
+    En la sección de Memoria Dinámica estudiaremos mejor este tema.
+    
 
 **Alimento para el pensamiento 1**
 
@@ -682,9 +693,177 @@ Un arreglo multidimensional se puede entender como una arreglo de una dimensión
 |     24     |      0     |     52    |    'g'    |
 +------------+------------+-----------+-----------+
 
+Memoria Dinámica
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Todos los programas tienen una forma de administrar la memoria mientras están corriendo, veamos algunos métodos que usan diferentes lenguajes
+para manejar la memoria:
+
+En algunos lenguajes, como C, el programador es el responsable de decirle al sistema cuando reservar y liberar memoria para guardar algún dato. 
+
+- En lenguaje C las variables se puede asignar en memoria de tres formas: estáticamente, automáticamente (en el stack), dinámicamente (en el heap) (algunas se almacenan también en registros del procesador).
+
+- El tamaño de las variables asignadas estáticamente y automáticamente se debe conocer en tiempo de compilación (antes del estándar C99).
+
+- Si el tamaño de la variable únicamente puede ser conocido en tiempo de ejecución, la variable debe asignarse de manera dinámica en el heap.
+
+.. image:: \../_static/guias/memoria_dinamica.png
+
+También hay otros lenguajes en los que la forma en que se maneja la memoria es algo de lo que el programador usualmente no necesita
+preocuparse, pues implementan algún mecanismo para manejar la memoria automáticamente como el `Garbage Collector <https://en.wikipedia.org/wiki/Garbage_collection_(computer_science)>`__.
+Que busca y libera memoria ocupada por objetos que el programa ya no usa.
+
+Rust tiene otro acercamiento al manejo de la memoria, **Ownership**. El concepto de Ownership es uno de los elementos que más se destacan en Rust,
+todo lo que requiere es hacer unas verificaciones en tiempo de compilación para 
+permitirle al lenguaje hacer un manejo seguro de la memoria sin sacrificar rendimiento en tiempo de ejecución.
 
 Ownership
 ^^^^^^^^^^^^
+Las reglas de **Ownership** son:
 
-El concepto de Ownership es uno de los elementos que más se destacan en Rust, es lo que le permite a Rust
-hacer un manejo seguro de la memoria sin utilizar garbage collector,
+- Cada valor en Rust tiene una variable a la que llamaremos *Owner*.
+- Solo puede existir un Owner a la vez.
+- Cuando el Owner sale del *Scope*, el valor es eliminado.
+
+El *Scope* es el rango dentro de un programa dentro del que un objeto es válido, digamos que tenemos una variable:
+
+.. code-block:: rust
+
+    let s = "Hello";
+
+La variable s es un string que es válido desde que es declarado hasta el final de su scope actual.
+
+.. code-block:: rust
+
+    { //La variable s no ha sido declarada y no es válida
+        let s = "Hello"; //La variable s es declarada y es válida dentro de este scope
+        ...
+    } //El scope se termina y s ya no es válida
+
+Hasta el momento es muy común a la forma en que funcionan muchos de los otros lenguajes. 
+Esta forma de declarar literales es bastante conveniente y fácil de utilizar, pero tienen
+un pequeño problema, son inmutables, ¿Qué haríamos si quisieramos almacenar algo que escriba el usuario?
+
+Para esto existen estructuras más complejas que las que hemos visto hasta el momento, como ``String``, 
+que es un tipo que se asigna o guarda en el heap y por eso puede guardar datos que conoceremos solo en tiempo de ejecución.
+
+.. code-block:: rust
+
+    let mut s = String::from("hello");
+
+    s.push_str(", world!"); // push_str() appends a literal to a String
+
+    println!("{}", s); // This will print `hello, world!`
+
+¿Porqué este String si es mutable y los literales no? La diferencia está en la implementación de cómo
+estos dos tipos manejan la memoria.
+
+Cómo para los literales ya conocemos el valor en tiempo de compilación, sus valores simplemente son quemados
+o *hardcoded* en el ejecutable final, esto solo es posible porque ya sabemos cuál es su tamaño y cuanto espacio
+necesitan en memoria antes de la ejecución del programa.
+
+Para que el tipo ``String`` pueda almacenar una cantidad variable de texto, necesitamos pedirle al sistema una cierta
+cantidad de memoria, desconocida al momento de compilar, para guardar estos datos. Esto significa que:
+
+- El espacio en memoria debe ser pedido al sistema en tiempo de ejecución.
+- Se necesita una manera de devolverle al sistema esa memoria cuando ya no se necesite.
+
+Lo primero se logra cuando llamamos al ``String::from``, que en su implementación pide la memoria que necesita.
+
+Para lo segundo, Rust devuelve automáticamente la memoria cuando al sistema cuando la variable que la contiene
+sale del scope.
+
+Veamos el siguiente ejemplo:
+
+.. code-block:: rust
+
+    fn main() {
+        let s1 = String::from("hello");
+        let s2 = s1;
+    }
+
+El código anterior puede parecer bastante simple, ``s1`` es un string y ``s2`` hace una copia 
+del valor de s1 y lo asigna a s2. ¿Pero si es esto lo que sucede?
+
+Veamos cómo funciona un ``String``. Este tipo está formado por 3 partes:
+
+- Un apuntador a la memoria que lo contiene
+- *lenght*: cuanta memoria está usando este String en un momento dado.
+- *capacity*: la cantidad de memoria total que ha recibido del sistema.
+
+.. image:: \../_static/guias/string_1.svg
+
+Cuando nosotros asignamos ``s1`` a ``s2``, copiamos la información del String, es decir,
+copiamos el apuntador, lenght y capacity que está en el **stack**, no la cadena de texto
+que se encuentra en el **heap**.
+
+Visualmente podemos verlo así:
+
+``s2`` hace una copia del apuntador, length y capacity de ``s1``
+
+.. image:: \../_static/guias/string_2.svg
+
+Esto puede ser un problema, pues cuando ambas variables salgan del scope Rust intentará
+liberar la memoria de sus apuntadores, pero cómo ambas variables apuntan a la misma dirección
+de memoria, tendremos un bug de *double free* que puede corromper el estado del administrador
+de memoria del sistema.
+
+Para esto Rust lo que hace es que *"mueve"* la variable ``s1`` a ``s2``, esto quiere decir
+que la variable s1 queda invalidada y solo se podra acceder a esta información por medio de 
+s2.
+
+Intenta correr el siguiente código:
+
+.. code-block:: rust
+
+    let s1 = String::from("hello");
+    let s2 = s1;
+
+    println!("{}, world!", s1);
+
+- ¿Porqué no funcionó?
+
+Para solucionar este problema le debemos indicar explícitamente 
+que s2 **clone** la información del heap.
+
+.. code-block:: rust
+
+    let s1 = String::from("hello");
+    let s2 = s1.clone();
+
+    println!("s1 = {}, s2 = {}", s1, s2);
+
+.. image:: \../_static/guias/string_3.svg
+
+En resumen, cuando los valores de los datos están guardados en el stack significa que ya los conocemos en
+tiempo de compilación y por lo tanto hacer copias de los valores es más fácil y rápido, por otro lado,
+cuando tenemos datos guardados en el heap, clonar los valores para una nueva variable puede ser bastante 
+costoso y riesgoso, por esta razón es más eficiente **mover** los valores (apuntador, length, capacity) a la nueva variable,
+pues son datos que podemos encontrar en el stack.
+
+Todos los ejemplos de esta sección fueron tomados de https://doc.rust-lang.org/book/ch04-01-what-is-ownership.html
+
+**Alimento para el pensamiento 3**
+
+Ejecuta el siguiente código y responde a las preguntas:
+
+.. code-block:: rust
+
+    fn main() {
+        let s1 = String::from("¿Había mencionado que en Rust los emojis son caracteres válidos 👁️ 👄👁️ ?");
+
+        print_string(s1);
+
+        println!("s1 = {}", s1);
+    }
+
+    fn print_string(my_string: String){
+        println!("my string: {}", my_string);
+    }
+
+- ¿Qué mensaje se imprime en la consola? ¿Porqué ocurre esto?
+- ¿Quien tiene el ownership de s1 antes de invocar la función **print_string()**?
+- ¿Quien tiene el ownership de s1 después de invocar la función **print_string()**?
+- ¿Dónde se libera la memoria asignada a s1?
+- Elimine el llamado a println!() que está dentro de main y vuelva a probar el código
+- ¿Porqué no podíamos volver a imprimir s1 dentro de **main** después de imprimirlo por usando la función **print_string()**?
