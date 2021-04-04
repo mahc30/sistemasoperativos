@@ -869,4 +869,186 @@ Ejecuta el siguiente código y responde a las preguntas:
 - ¿Quien tiene el ownership de s1 después de invocar la función **print_string()**?
 - ¿Dónde se libera la memoria asignada a s1?
 - Elimine el llamado a println!() que está dentro de main y vuelva a probar el código
-- ¿Porqué no podíamos volver a imprimir s1 dentro de **main** después de imprimirlo por usando la función **print_string()**?
+- ¿Porqué no podíamos volver a imprimir s1 dentro de **main** después de imprimirlo usando la función **print_string()**?
+
+Estructuras de Datos
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Una estructura es una colección de una o más
+variables, estas variables pueden ser de tipos
+diferentes, agrupadas bajo un mismo nombre para
+facilitar su manejo.
+
+**Ejemplo: ¿Cómo se declara una estructura?**
+
+Quiero crear una colección (estructura) que me permita agrupar dos enteros. 
+Los enteros son las coordenadas de un punto en el espacio.
+
+.. image:: \../_static/guias/structs_1.png
+
+
+.. code-block::rust
+
+    struct Point {
+    x: u32,
+    y: u32
+    }
+
+¿La definición anterior de la estructura Point ocupa espacio en memoria?
+
+
+Definición de variables del tipo de la estructura e inicialización
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block::rust
+
+    //Diferentes formas de declarar e instanciar estructuras
+    let (pt1, pt2) : (Point, Point);
+    
+    let pt3 : Point = Point{
+        x : 4,
+        y : 2
+    };
+
+    pt1 = Point{
+        x : 5,
+        y : 6 
+   };
+    
+   pt2 = Point{
+       x: 2,
+       y: 7
+   };
+
+- pt1 y pt2 son dos variables de tipo Point.
+- Si los enteros ocupan 2 bytes, el procesador puede direccionar
+cada byte, y el endian del procesador es BIG:
+
++------------+------------+
+| Dirección  | Contenido  |
++============+============+
+| 0 (pt1.xH) |     0      |
++------------+------------+
+| 1 (pt1.xL) |     5      |
++------------+------------+
+| 2 (pt1.yH) |     0      |
++------------+------------+
+| 3 (pt1.yL) |     6      |
++------------+------------+
+| 4 (pt2.xH) |     0      |
++------------+------------+
+| 5 (pt2.xL) |     2      |
++------------+------------+
+| 6 (pt2.yH) |     0      |
++------------+------------+
+| 7 (pt2.yL) |     7      |
++------------+------------+
+
+¿Qué es el endian de un procesador?
+
+**Cree una variable de tipo cdsMusica e inicialice cada uno de sus miembros:**
+- Titulo: Brindo con el alma.
+- Artista: Diomedes Díaz.
+- Genero: Vallenato.
+- numCanciones: 11
+- Lanzamiento: 1986
+- Precio: 19900
+
+Estructuras: ¿Cómo acceder a los miembros de una estructura?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Por medio del operador punto**
+
+.. code-block::rust
+
+    println!("pt1: ({},{})\npt2: ({},{})\npt3: ({},{})", pt1.x, pt1.y, pt2.x, pt2.y, pt3.x, pt3.y);
+
+**Cree un programa que imprima los miembros de la variable cdsMusica del punto anterior.**
+
+Estructuras: anidando estructuras
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+De nuevo considera el ejemplo de los puntos.
+
+.. code-block::rust
+
+    struct Point {
+    x: u32,
+    y: u32
+    }
+
+    struct Rect {
+    pt1 : Point,
+    pt2 : Point
+    }
+
+.. image:: \../_static/guias/structs_2.png
+
+**Analizar este programa**
+
+.. code-block:: rust
+
+    struct Estudiante{
+        nombre: String,
+        numEstudiante: i32,
+        agnoMatricula: u32,
+        nota: f32
+    }
+
+    fn main() {
+    
+        let estud1 = Estudiante{
+            nombre: String::from("Jose"),
+            numEstudiante: 4,
+            agnoMatricula: 2009,
+            nota: 4.5
+        };
+
+        let ptrEstruct : *const Estudiante;
+
+        ptrEstruct  = &estud1;
+
+        unsafe{
+            println!("La nota de estud1 es: {} (Con Apuntador)", (*ptrEstruct).nota);
+        }
+
+        println!("La nota de estud1 es: {} (Sin Apuntador)", estud1.nota);
+    }
+
+ptrEstruct es una variable que puede almacenar la dirección
+(apuntador) en memoria de una estructura de tipo estudiante.
+
+Para acceder a los miembros de la estructura a través del
+apuntador también usamos el **operador punto**, sin embargo es necesario
+usar el **operador de desreferencia**, que nos permite acceder al valor
+contenido en la dirección a la que apunta **ptrEstruct**.
+
+- Elimina el bloque **unsafe** e intenta compilarlo. ¿Qué mensaje arroja el compilador?
+
+*Recuerda que cuando programamos en Rust debemos tratar de evitar usar* **Raw Pointers**
+*siempre que sea posible pues no son seguros. Rust nos da muchas herramientas para acceder a la memoria de forma segura*
+
+Vuelve a agregar el **unsafe** que eliminaste en el punto anterior para hacer los siguientes puntos:
+
+- Complete este programa para que imprima el contenido de los demás miembros del arreglo.
+- Adicione una función al programa que permita actualizar los miembros de la estructura estud1 si se
+presiona la tecla r. Imprima de nuevo los valores de los miembros de la estructura.
+
+Archivos
+^^^^^^^^^^^
+
+Para poder realizar operaciones de entrada/salida
+(leer/escribir) un archivo en Rust es necesario ABRIRLO
+primero.
+
+Abra la consola y ejecute los siguientes comandos:
+
+.. code-block:: bash
+
+    echo "hola mundo" > input.txt
+
+    cat input.txt
+
+    hexdump –C input.txt
+
+**¿Cuántos caracteres tiene el archivo?**
