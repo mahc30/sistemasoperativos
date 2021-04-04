@@ -887,7 +887,7 @@ Los enteros son las coordenadas de un punto en el espacio.
 .. image:: \../_static/guias/structs_1.png
 
 
-.. code-block::rust
+.. code-block:: rust
 
     struct Point {
     x: u32,
@@ -900,7 +900,7 @@ Los enteros son las coordenadas de un punto en el espacio.
 Definición de variables del tipo de la estructura e inicialización
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. code-block::rust
+.. code-block:: rust
 
     //Diferentes formas de declarar e instanciar estructuras
     let (pt1, pt2) : (Point, Point);
@@ -921,8 +921,7 @@ Definición de variables del tipo de la estructura e inicialización
    };
 
 - pt1 y pt2 son dos variables de tipo Point.
-- Si los enteros ocupan 2 bytes, el procesador puede direccionar
-cada byte, y el endian del procesador es BIG:
+- Si los enteros ocupan 2 bytes, el procesador puede direccionar cada byte, y el endian del procesador es BIG:
 
 +------------+------------+
 | Dirección  | Contenido  |
@@ -947,6 +946,7 @@ cada byte, y el endian del procesador es BIG:
 ¿Qué es el endian de un procesador?
 
 **Cree una variable de tipo cdsMusica e inicialice cada uno de sus miembros:**
+
 - Titulo: Brindo con el alma.
 - Artista: Diomedes Díaz.
 - Genero: Vallenato.
@@ -954,23 +954,42 @@ cada byte, y el endian del procesador es BIG:
 - Lanzamiento: 1986
 - Precio: 19900
 
-Estructuras: ¿Cómo acceder a los miembros de una estructura?
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+¿Cómo acceder a los miembros de una estructura?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Por medio del operador punto**
 
-.. code-block::rust
+.. code-block:: rust
+
+    let (pt1, pt2) : (Point, Point);
+    
+    let pt3 : Point = Point{
+         x : 4,
+         y : 2
+    }; 
+    
+     pt1 = Point{
+         x : 5,
+         y : 6 
+    };
+    
+    pt2 = Point{
+        x: 2,
+        y: 7
+    };
 
     println!("pt1: ({},{})\npt2: ({},{})\npt3: ({},{})", pt1.x, pt1.y, pt2.x, pt2.y, pt3.x, pt3.y);
 
+
+
 **Cree un programa que imprima los miembros de la variable cdsMusica del punto anterior.**
 
-Estructuras: anidando estructuras
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Anidando Estructuras
+^^^^^^^^^^^^^^^^^^^^^
 
 De nuevo considera el ejemplo de los puntos.
 
-.. code-block::rust
+.. code-block:: rust
 
     struct Point {
     x: u32,
@@ -983,6 +1002,8 @@ De nuevo considera el ejemplo de los puntos.
     }
 
 .. image:: \../_static/guias/structs_2.png
+
+**Cree un programa que permita ingresar los puntos pt1 y pt2 e imprima el área del rectángulo.**
 
 **Analizar este programa**
 
@@ -1025,25 +1046,61 @@ contenido en la dirección a la que apunta **ptrEstruct**.
 
 - Elimina el bloque **unsafe** e intenta compilarlo. ¿Qué mensaje arroja el compilador?
 
-*Recuerda que cuando programamos en Rust debemos tratar de evitar usar* **Raw Pointers**
-*siempre que sea posible pues no son seguros. Rust nos da muchas herramientas para acceder a la memoria de forma segura*
+.. note::
+
+    *Recuerda que cuando programamos en Rust debemos tratar de evitar usar* **Raw Pointers**
+    *siempre que sea posible pues no son seguros. Rust nos da muchas herramientas para acceder a la memoria de forma segura*
 
 Vuelve a agregar el **unsafe** que eliminaste en el punto anterior para hacer los siguientes puntos:
 
-- Complete este programa para que imprima el contenido de los demás miembros del arreglo.
-- Adicione una función al programa que permita actualizar los miembros de la estructura estud1 si se
-presiona la tecla r. Imprima de nuevo los valores de los miembros de la estructura.
+- Complete este programa para que imprima el contenido de los demás miembros del struct.
+- Adicione una función al programa que permita actualizar los miembros de la estructura estud1 si se presiona la tecla r. Imprima de nuevo los valores de los miembros de la estructura.
 
 Archivos
 ^^^^^^^^^^^
 
-Para poder realizar operaciones de entrada/salida
-(leer/escribir) un archivo en Rust es necesario ABRIRLO
-primero.
+Antes de continuar hay que estudiar un tipo de dato nuevo, aunque ya lo hemos utilizado en ejemplos anteriores.
+
+Recordemos el ejemplo de la sección de Entrada y Salida.
+
+.. code-block:: rust
+    
+    use std::io;
+
+    fn main() {    
+        let mut input : String = String::new();
+        
+        io::stdin().read_line(&mut input).expect("Failed to read");
+    }
+
+La función read_line() copia en el string que le pasamos como argumento cualquier texto que escriba el usuario,
+pero también retorna un valor. Este valor es de tipo ``Result``, un tipo **Result** es también un ``enum`` o *Enumeration*.
+
+Los enum son un tipo que puede tener un número fijo de posibles valores, a estos posibles valores los llamaremos ``Variants``.
+
+Para **Result** las variantes son **Ok** o **Err**. 
+
+**Ok** indica que la operación fue exitosa, y dentro de esta variante se encuentra el valor generado exitosamente.
+
+**Err** significa que la operación falló y contiene información de porqué falló.
+
+El propósito de los tipos **Result** es codificar la información del manejo de errores. Todas las instancias de
+**Result** tienen un método ``expect()`` que podemos invocar. Si el valor de nuestro **Result**
+es **Err**, expect() causará que el programa crashee y muestre el mensaje que le pasamos como argumento.
+
+Para nuestro caso para que **read_line()** retorne **Err** lo más probable es que sea un error enviado desde el sistema operativo.
+Si retorna **Ok**, el expect() va a tomar el valor que **Ok** tiene para que podamos usarlo más adelante. *En este caso sería el número de 
+bytes que del mensaje que el usuario escribió*.
+
+Con esto en mente podremos aprender a manejar archivos más fácilmente.
 
 Abra la consola y ejecute los siguientes comandos:
 
 .. code-block:: bash
+
+    cargo new files
+
+    cd files
 
     echo "hola mundo" > input.txt
 
@@ -1052,3 +1109,32 @@ Abra la consola y ejecute los siguientes comandos:
     hexdump –C input.txt
 
 **¿Cuántos caracteres tiene el archivo?**
+
+Edita el archivo main.rs que se encuentra dentro de src
+
+.. image:: \../_static/guias/files_1.png
+
+Desde la carpeta files ejecuta el comando
+
+.. code-block:: bash
+
+    cargo run
+
+- ¿Con qué función podemos leer el contenido de un archivo?
+- ¿Qué tipo retorna la función?
+- ¿Qué valor está tomando expect?
+
+**Alimento para el pensamiento...**
+
+- Hacer un programa que copie el contenido de un archivo origen en un archivo destino.
+- El programa debe preguntar por el nombre de ambos archivos.
+
+**Ejercicio Práctico**
+
+Realice un programa que permita calcular el promedio ponderado
+obtenido por un estudiante en el semestre, considerando:
+
+- El programa recibe el archivo de entrada cómo el que se muestra al lado izquierdo.
+- El programa debe generar el archivo de salida que se muestra al lado derecho.
+
+.. image:: \../_static/guias/files_2.png
