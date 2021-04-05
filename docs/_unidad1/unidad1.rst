@@ -126,48 +126,22 @@ En esta unidad vamos a aprender un nuevo lenguaje de programación, es simple
 pero muy poderoso. En este :doc:`enlace <../_guias/guias>` 
 encontrarás una guía básica de Rust.
 
-.. note::
-    ¡Alerta de Spoiler!
-
-    En este `enlace <https://drive.google.com/file/d/174GYcz_in94R_z6NklA02yzmsj3OuD5f/view?usp=sharing>`__
-    , se encuentra la solución a algunos puntos de la guía introductoria a Rust (ojo, no todos). 
-    Te recomiendo hacer los ejercicios sin recurrir a la solución.
-
-Ejercicio 6: continuemos estudiando Rust
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Primero te voy a proponer que hagas dos guías para que trabajes los conceptos
-básicos y luego una serie de ejercicios que te permitirán practicar varias
-de las cosas que has hecho hasta ahora.
-
-Realiza `esta <https://drive.google.com/file/d/19NmKVXEYB5Ud0SqbBwAe4HVYMD6LDHKD/view>`__ 
-guía sobre punteros, arreglos y memoria dinámica.
-
-.. note::
-        ¡Alerta de Spoiler!
-    
-    En este `enlace <https://docs.google.com/presentation/d/1eCo1pCzYd0YB1dYhTLJNV8w9lVAQVX6u4LQEq1oHtH0/edit#slide=id.p9>`__
-    se encuentra la solución a la guía de punteros, arreglos y memoria dinámica.
-
-Realiza `esta <https://drive.google.com/open?id=1hBPkoUsGUmatr3tRm5ztr-s3hyc3OLhl>`__ 
-guía sobre estructuras de datos y archivos.
-
-.. note::
-        ¡Alerta de Spoiler!
-
-    La solución a algunos puntos la puedes consultar `aquí <https://drive.google.com/file/d/1FWuPqJNWvEvHp89-ADvKu7XqdAZR6fx2/view?usp=sharing>`__ 
-
-Ejercicio 7: entrada/salida
+Ejercicio 6: Strings
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-En la guía introductoria del lenguaje C se discutió la
-función **scanf** para realizar operaciones de entrada en
-C. Al realizar el ejercicios final, la calculadora,
-¿Notaste algún comportamiento extraño del
-programa al leer caracteres? Específicamente ``scanf("%c",&var)``.
+En la guía introductoria del lenguaje Rust vimos un ejemplo de
+una representación de cómo se guardan los strings en memoria.
 
-Ten presente que al introducir texto en la terminal,
-además de los caracteres visibles, se introduce un ENTER.
+En el ejemplo declaramos los strings como arreglos de caracteres
+
+.. code-block:: rust
+
+    let nombres : [[char; 10]; 3] = [['F','u','l','a','n','o', '\0', '\0', '\0', '\0'], ['M','e','n','g','a','n','o', '\0', '\0', '\0'], ['P','e','r','a','n','o', '\0', '\0', '\0', '\0']];
+
+Más adelante vimos que Rust tenía métodos más fáciles y seguros para instanciar y manejar Strings,
+en los siguientes ejercicios vamos a ver otros métodos que son muy útiles para trabajar con Strings.
+
+Al introducir texto en la terminal, además de los caracteres visibles, se introduce un ENTER.
 Así, por ejemplo, al introducir el número 325 y luego presionar
 ENTER, se están ingresando 4 bytes: 0x33 0x32 0x35 0x0A. los
 tres primeros bytes corresponden a los códigos ASCII de cada dígito
@@ -176,81 +150,134 @@ o nueva línea (NEW LINE).
 
 Considere el siguiente código:
 
-.. code-block:: c
-    :linenos:
+.. code-block:: rust
 
-    #include <stdio.h>
+    use std::io;
 
-    int main()
-    {
-        int num;
-        char key;
-        printf("Prueba a scanf. Ingrese el numero 325 y presione ENTER:\n");
-        scanf("%d",&num);
-        printf("Ingrese cualquier tecla para terminar y presione ENTER:\n");
-        scanf("%c",&key);
-        
-        return 0;
-    }  
+    fn main() {
+
+        let mut input : String = String::new();
+        let num: i64;
+        let key: char;
+        let mut num_bytes: usize;
+
+        println!("Ingrese el numero 325 y presione ENTER:\n");
+
+        num_bytes = io::stdin().read_line(&mut input).expect("Failed to read");
+        num = input.trim().parse().expect("El texto ingresado no es un número");
+
+        println!("Se leyeron: {} bytes\nnum: {}", num_bytes, num);
+    
+        print!("Ingrese cualquier tecla para terminar y presione ENTER:\n");
+        input = String::new();
+
+        num_bytes = io::stdin().read_line(&mut input).expect("Failed to read");
+        key = input.chars().next().expect("No se pudo leer el caracter");
+
+        println!("num_bytes: {}\nkey: {}", num_bytes, key);
+    }
 
 Ejecuta el código anterior. ¿Cuál es el resultado? ¿Por qué?
 
-El primer scanf (``scanf("%d",&num);``) buscará en el flujo de entrada una
-secuencia de bytes que comience con un carácter numérico y parará de leer
-una vez detecte un carácter no numérico, el cual, dejará intacto en el flujo
-de entrada. En este caso, ``scanf("%d",&num);`` sacará del flujo
-los bytes 0x33 0x32 0x35, correspondientes a ``'3'`` ``'2'`` ``'5'``,
-y dejará en el flujo el byte 0x0A (correspondiente al ENTER). Luego
+El primer read_line (``io::stdin().read_line(&mut input).expect("Failed to read");``) buscará en el flujo de entrada una
+secuencia de bytes (cadena de texto) y parará de leer una vez detecte un carácter NEWLINE (0xA) o EOF.
+En este caso ``io::stdin().read_line(&mut input).expect("Failed to read");`` copiará en nuestro buffer ``input`` 
+los bytes 0x33 0x32 0x35, correspondientes a ``'3'`` ``'2'`` ``'5'``, e incluirá el byte 0x0A (correspondiente al ENTER). 
+
+Luego usando las funciones de la clase String, ``input.trim().parse().expect("El texto ingresado no es un número");``
 convertirá la cadena de 3 bytes en ASCII al número que representan, es decir,
-al 325 que en base 16 sería 0x0145 (comprueba esto con la calculadora del
-sistema operativo)
+al 325 que en base 16 sería 0x0145 (comprueba esto con la calculadora del sistema operativo).
 
-El segundo scanf ``scanf("%c",&key);`` leerá un carácter del flujo de entrada.
-En este caso dicho carácter está disponible y corresponde al ENTER dejado
-por el scanf anterior.
+Gracias a la inferencia de tipos, Rust sabe que estamos intentando convertir el String almacenado en ``input`` a 
+un número entero, porque estamos asignando el valor que retorna ``parse()`` a la variable ``num`` que al comienzo
+del programa fue declarada como ``i64``.
 
-¿Cómo solucionar este problema? Una posible solución será (aunque hay otras
-más):
+Antes de volver a leer el flujo, es necesario limpiar la variable en la que estamos almacenando el input del usuario, si no tenemos otra,
+para esto usamos ``String::new()`` para asignar el nuevo valor a nuestra variable ``input``.
 
-.. code-block:: c
-    :linenos:
+El segundo scanf ``io::stdin().read_line(&mut input).expect("Failed to read");`` leerá de nuevo el flujo de entrada, pero
+en este caso solo queremos obtener el primer caracter de este flujo, para esto podemos invocar al método ``chars()`` para
+obtener un iterador del string, y luego al método ``next()`` del iterador para obtener el primer elemento del iterador, o en este caso, del String.
 
-    #include <stdio.h>
+- ¿Qué es el **newline character**?
+- ¿Qué hace la función ``trim()``?
 
-        int main()
-        {
-            int num;
-            char key;
-            printf("Prueba a scanf. Ingrese el numero 325 y presione ENTER:\n");
-            scanf("%d",&num);
-            scanf("%c",&key); // Saco del flujo el ENTER
-            printf("Ingrese cualquier tecla para terminar y presione ENTER:\n");
-            scanf("%c",&key);
-            return 0;
-        }  
-
-Ejercicio 8: entrada/salida
+Ejercicio 7: Parsing
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Para complementar el ejercicio anterior, se propone analizar otros ejemplos
-(Tomados de este `enlace <http://sekrit.de/webdocs/c/beginners-guide-away-from-scanf.html>`__).
+Vamos a continuar con el código del ejemplo anterior, agrega a tu código las siguientes modificaciones:
+
+.. code-block:: rust
+
+    fn main() {
+
+        let mut input : String = String::new();
+        let num: i64;
+        let key: char;
+        let mut num_bytes: usize;
+
+        println!("Ingrese el numero 325 y presione ENTER:\n");
+
+        num_bytes = io::stdin().read_line(&mut input).expect("Failed to read");
+        num = input.trim().parse().expect("El texto ingresado no es un número");
+
+        println!("Se leyeron: {} bytes\nnum: {}\nnum to Hex {:#X}", num_bytes, num, num);
+
+        let buffer: Vec<u8> = input.as_bytes().to_vec();
+
+        for i in 0..buffer.capacity(){
+            println!("{:#X}", buffer[i]);
+        }
+
+        print!("Ingrese cualquier tecla para terminar y presione ENTER:\n");
+        input = String::new();
+
+        num_bytes = io::stdin().read_line(&mut input).expect("Failed to read");
+        key = input.chars().next().expect("No se pudo leer el caracter");
+        println!("num_bytes: {}\nkey: {}", num_bytes, key);
 
 
-.. code-block:: c
-    :linenos:
+        let key_to_hex = key as u32; //Casteo Explícito
 
-    #include <stdio.h>
+    
+        println!("{} Key to Hex {:#X}", key, key_to_hex); 
+    }
 
-    int main(void)
-    {
-        int a = 10;
-        printf("enter a number: ");
-        scanf("%d", &a);
-        printf("You entered %d.\n", a);
-    }  
+Presta atención al primer ``println!()``, en las guías hablamos de los ``{}`` eran reemplazados por los demás
+argumentos que pasabamos a la función, pero también podemos agregarles `Formatting Traits <https://doc.rust-lang.org/std/fmt/#formatting-traits>`__,
+para indicar que un argumento tiene cierto formato. Para el caso de ``{:#X}``, ``#`` significa que queremos imprimir el
+**0x** al comienzo del hexadecimal y ``X`` es Hexadecimales en mayúscula (A,B,C,...,F).
 
-Ingresa un número y ENTER. ¿Qué ocurre? Ahora ingresa una palabra y ENTER.
-¿Qué ocurre? ¿Por qué?
+Ejecuta el código anterior y responde:
+
+- ¿El valor hexadecimal del 325 si concuerda con el de la explicación del punto anterior?
+- ¿Cuál es el valor hexadecimal de la letra 'a'? ¿y de 'A'?
+- Cuando aparezca el mensaje de "Ingrese cualquier tecla para terminar" intenta ingresar los siguientes valores
+- ENTER 
+- A
+- Á
+- 🐧
+- ¿Qué valores en hexadecimal tienen? ¿Cuántos bytes fueron leídos en cada caso?
+
+Ejercicio 9: entrada/salida
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- ¿Qué ocurre si cuando nos pida ingresar un número ingresamos una palabra?
+- ¿Qué ocurre si solo presionamos ENTER?
+- Modifica el programa anterior para que el programa no se detenga en caso de que el input del usuario no sea válido.
+
+.. raw:: html
+
+    <details>
+    <summary> <strong>Spoiler</strong> una solución al problema puede ser: </summary>
+ 
+.. image:: \../_static/unidad_1/user_input_loop.png
+
+.. raw:: html
+
+   </details>
+
+|
 
 Ejercicio 9: scanf return
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

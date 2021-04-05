@@ -669,7 +669,7 @@ Arreglos Multidimencionales
 
 Un arreglo multidimensional se puede entender como una arreglo de una dimensión cuyos elementos son arreglos.
 
-¿Cómo se almacena el arreglo “numeros” en memoria si los char ocupan 4 bytes?
+¿Cómo se almacena el arreglo “nombres” en memoria si los char ocupan 4 bytes?
 
 .. code-block:: rust
 
