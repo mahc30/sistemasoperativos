@@ -478,20 +478,6 @@ La expresión ``println!("{}",  *(*(*p).as_ptr().offset(2)).as_ptr().offset(3));
 Ejercicio 15
 ^^^^^^^^^^^^^
 
-
-Ejercicio 16
-^^^^^^^^^^^^^^
-
-
-
-Ejercicio 17: 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-
-
-Ejercicio 18
-^^^^^^^^^^^^^
-
 Te propongo que realices un programa que:
 
 * Solicite el tamaño de un arreglo.
@@ -509,47 +495,74 @@ Trata de PENSARLE UNOS MINUTOS. Más abajo está la solución.
 
 El siguiente código muestra una posible solución:
 
-.. code-block:: c
+.. code-block:: rust
    :linenos:
 
-    #include <stdio.h>
-    #define MAX 100
+    use std::io;
 
-    void printArray(int *pdata,int n){
+	fn read_user_input(buffer: &mut String) {
+ 	   buffer.clear();
+ 	   io::stdin().read_line(buffer).expect("Failed to read_user_input");
+	}
 
-        printf("\n The array is: \n");
+	fn print_array(arr: &mut Vec<i32>){
+   	 for i in 0..arr.len(){
+  	      println!("data[{}] = {}", i, arr[i]);
+  	  }
+	}
 
-        for(int i = 0; i< n ;i++) {
-            printf("data[%d]: %d\n",i,  *(pdata+i) );
-        }
-    }
+	fn main() {
+    
+   	 let mut buffer = String::new();
+    
+    	println!("Escriba el tamaño del arreglo");
+    	read_user_input(&mut buffer);
+    
+   	 let n : usize = buffer.trim().parse().unwrap();
+   	 let mut data : Vec<i32> = Vec::new();
+    
+   	 for i in 0..n {
+    
+      	  println!("Escriba el elemento {}", i);
+      	  read_user_input(&mut buffer);
+        
+    	    let elem : i32 = buffer.trim().parse().unwrap();
+    	    data.push(elem);
+   	 }
+    
+   	 print_array(&mut data);
 
-    int main(){
-        int n;
-        int data[MAX];
-        int position;
+  	 println!("Ingrese la posición donde quiere insertar");
+  	read_user_input(&mut buffer);
+ 	 let mut position : usize = buffer.trim().parse().unwrap();
+ 	 position = position - 1;
+  
+ 	 for i in data.len() - 1..position{
+  	  data[i+1] = data[i];
+  	}
+  
+ 	 println!("Ingrese el valor a insertar");
+ 	 read_user_input(&mut buffer);
 
-        printf("Enter the length of the array: ");
-        scanf("%d", &n);
-        printf("Enter %d elements of the array \n",n);
+ 	 data[position] = buffer.trim().parse().unwrap();
 
-        for(int i = 0; i < n; i++){
-            scanf("%d", &data[i]);
-        }
-        printArray(data, n);
+	  print_array(&mut data);
+	}
 
-        printf("\n Enter a position where you want to insert: ");
-        scanf("%d", &position);
-        position--;
-        for(int i = n-1;i >= position; i--){
-            data[i+1] = data[i];
-        }
-        printf("\nEnter the value: ");
-        scanf("%d", &data[position]);
+Ejercicio 16
+^^^^^^^^^^^^^^
 
-        printArray(data,n+1);
-        return 0;
-    }
+
+
+Ejercicio 17: 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+Ejercicio 18
+^^^^^^^^^^^^^
+
+
 
 Ejercicio 19
 ^^^^^^^^^^^^^^^^
