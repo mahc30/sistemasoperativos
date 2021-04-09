@@ -625,23 +625,28 @@ Considere:
     fn main()
     {
 
-        let mut arr: [i32; 6] = [2,3,1,0,9,6];
-
         unsafe{
 
+            let mut arr: [i32; 6] = [2,3,1,0,9,6];
+            print_array(arr.as_mut_ptr(), arr.len() as isize);
             let mut ptr1 : *mut i32;
-    
+            
             let ptr2 : *mut i32 = arr.as_mut_ptr().add(5);
-
+        
             ptr1 = arr.as_ptr() as *mut i32; //Casteo explícito para indicar que el apuntador es variable
-    
+            
+            //println!("arr.as_ptr() = {:p}\narr.as_mut_ptr().add(5); = {:p}", ptr1, ptr2);
             ptr1 = ptr1.add(2);
-    
+            //println!("ptr1.add(2) = {:p}", ptr1);
+        
             *ptr1 = 5;
-    
-            *ptr2.sub(1) = *ptr2.sub(1) - 1;
-
-            *(ptr2) = *ptr1 + *(ptr2.offset(-1))
+            
+            *ptr2 = *ptr2.sub(1) - 1;
+        
+            *(ptr2) = *ptr1 + (*(ptr2.offset(-1)) + *ptr2);
+            
+            println!("ptr1: {:p}\n *ptr1: {}\nptr2: {:p}\n*ptr2: {}", ptr1, *ptr1, ptr2, *ptr2);
+            print_array(arr.as_mut_ptr(), arr.len() as isize);
         }
     }
 

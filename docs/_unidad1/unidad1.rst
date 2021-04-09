@@ -112,21 +112,21 @@ Para comprobar que Rust y Cargo fueron instalados correctamente podemos usar el 
 
     cargo --version
 
-Ejercicio 4: línea de comandos
+Ejercicio 3: línea de comandos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Explorando un poco más la línea de comandos, disponible en casi todos los sistemas operativos. 
 Para ello te propongo realizar la siguiente `guía <https://drive.google.com/open?id=11tTtbCuVjYcBBYPrULbCeb0PABJLyhGEtzRGKMRG5u0>`__.
 
 
-Ejercicio 5: lenguaje de programación Rust
+Ejercicio 4: lenguaje de programación Rust
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 En esta unidad vamos a aprender un nuevo lenguaje de programación, es simple 
 pero muy poderoso. En este :doc:`enlace <../_guias/guias>` 
 encontrarás una guía básica de Rust.
 
-Ejercicio 6: Strings
+Ejercicio 5: Strings
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 En la guía introductoria del lenguaje Rust vimos un ejemplo de
@@ -202,6 +202,29 @@ obtener un iterador del string, y luego al método ``next()`` del iterador para 
 - ¿Qué es el **newline character**?
 - ¿Qué hace la función ``trim()``?
 
+Ejercicio 6: I/O
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Crea una función que reciba un apuntador a una variable tipo String y guarde el input del usuario en la dirección de esa variable
+
+.. raw:: html
+
+    <details>
+    <summary> <strong>Spoiler</strong> una solución al problema puede ser: </summary>
+ 
+.. code-block:: rust
+
+    fn read_user_input(buffer: &mut String) {
+        buffer.clear();
+        io::stdin().read_line(buffer).expect("Failed to read_user_input");
+    }
+
+.. raw:: html
+
+   </details>
+
+|
+
 Ejercicio 7: Parsing
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -259,8 +282,8 @@ Ejecuta el código anterior y responde:
 - 🐧
 - ¿Qué valores en hexadecimal tienen? ¿Cuántos bytes fueron leídos en cada caso?
 
-Ejercicio 9: entrada/salida
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Ejercicio 8
+^^^^^^^^^^^^^
 
 - ¿Qué ocurre si cuando nos pida ingresar un número ingresamos una palabra?
 - ¿Qué ocurre si solo presionamos ENTER?
@@ -279,194 +302,87 @@ Ejercicio 9: entrada/salida
 
 |
 
-Ejercicio 9: scanf return
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Ejercicio 9: Pattern Matching
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-scanf devuelve la cantidad de conversiones realizadas. Analiza
-este ejemplo (ingresa CRTL+C si algo sale mal):
+Otra expresión nueva que usamos en la guía fue ``match`` para codificar manejo de errores cuando leemos
+input del usuario, pero esta expresión tiene muchos más usos, analiza el siguiente programa:
 
-.. code-block:: c
-    :linenos:
+.. image:: \../_static/unidad_1/pattern_matching_char.png
 
-    #include <stdio.h>
+- ¿Qué hace el programa?
+- Modifica el programa para que la variable op sea un valor asignado por el usuario y prueba ingresando los caracteres `+` `-` `*` `/` `a`.
+- ¿Cuáles son los resultados?
 
-    int main(void)
-    {
-        int a;
-        printf("enter a number: ");
-        while (scanf("%d", &a) != 1)
-        {
-            // input was not a number, ask again:
-            printf("enter a number: ");
-        }
-        printf("You entered %d.\n", a);
+Ejercicio 10
+^^^^^^^^^^^^^^
+
+Las expresiones ``match`` consisten de un **value**, y varios **arms** con patrones y expresiones para 
+ser ejecutadas en caso de que el **value** sea el mismo que el del patrón. 
+
+.. code-block:: rust
+
+    match VALUE {
+        PATTERN => EXPRESSION,
+        PATTERN => EXPRESSION,
+        PATTERN => EXPRESSION,
     }
 
-¿Por qué funciona así el programa? Recuerda el ejercicio 6.
+*Tomado del* `*libro oficial de Rust* <https://doc.rust-lang.org/book/ch18-01-all-the-places-for-patterns.html>`__.
 
-Ejercicio 10: cadenas
-^^^^^^^^^^^^^^^^^^^^^^
+- Haz un programa que lea un número del usuario y que imprima "Es positivo" si es mayor o igual a cero y "Es negativo" menor que 0
 
-Compila el código que se muestra a continuación así:
-``gcc -Wall -fno-stack-protector tmp.c -o tmp``
+.. raw:: html
 
-Ejecuta el programa con estos vectores de prueba cuando se pregunte
-por el nombre:
+    <details>
+    <summary> <strong>Spoiler</strong> una solución al problema puede ser: </summary>
+ 
+.. image:: \../_static/unidad_1/pattern_matching_fn.png
 
-* juan
-* juan-fernan
-* juan-fernando-franco
+.. raw:: html
 
-.. code-block:: c
-    :linenos:
+   </details>
 
-    #include <stdio.h>
+|
 
-    int main(void)
-    {
-        char name[12];
-        printf("What's your name? ");
-        scanf("%s", name);
-        printf("Hello %s!\n", name);
-    }
+Ejercicio 11: Wildcard Pattern
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Explique cómo funciona el programa en cada caso.
+Usar ``_`` como patrón es usado para ignorar valores que no nos interesan o que no coinciden con alguno de los patrones
+de los arms. En la imagen del ejercicio 9 puedes ver que lo usamos para indicar qué comportamiento tendrá el programa en caso
+de que el caracter ĺeido no sea alguna de las operaciones indicadas.
 
-Ejercicio 11
-^^^^^^^^^^^^^^^^
-
-Repite el ejercicio anterior pero esta vez compilando
-sin ``-fno-stack-protector``.
+- Haz un programa que con solo un ``match`` imprima "Es positivo", "Es negativo" o "Es cero" según sea el caso.
 
 Ejercicio 12
 ^^^^^^^^^^^^^^
 
-Finalmente repita el ejercicio anterior, pero esta vez
-usando el siguiente código y compilando sin ``-fno-stack-protector``
+Programa una calculadora que permita sumar, restar, dividir o multiplicar dos números. El usuario debe poder
+terminar el programa escribiendo 'N' o 'n'. 
 
-.. code-block:: c
-    :linenos:
+Ejercicio 13 Arreglos y Punteros
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    #include <stdio.h>
-
-    int main(void)
-    {
-        char name[40];
-        printf("What's your name? ");
-        scanf("%39s", name);
-        printf("Hello %s!\n", name);
-    }
-
-Explica por qué en scanf especificamos un 39 sabiendo que name puede almacenar 
-40 caracteres. Recuerda, de la primera guía, que todas las cadenas en C deben terminar
-con un 0.
-
-Ejercicio 13
-^^^^^^^^^^^^^^^^
-
-Usando el código anterior ingresa:  juan fernado franco.
-¿Cuál es el resultado? ¿Por qué?
-
-Ejercicio 14
-^^^^^^^^^^^^^^^^
-
-Escribe el siguiente código:
-
-.. code-block:: c
-    :linenos:
-
-    #include <stdio.h>
-
-    int main(void)
-    {
-        char name[40];
-        printf("What's your name? ");
-        scanf("%39[^\n]", name);
-        printf("Hello %s!\n", name);
-    }
-
-Nota la línea:``scanf("%39[^\n]", name);``. En este caso le estamos diciendo a
-scanf que lea hasta 39 caracteres y hasta que encuentre un ENTER (``\n``). También
-es posible indicarle a scanf que lea mientras que los caracteres estén en una
-lista, por ejemplo: ``scanf("%39[a-z]", name);``.
-
-Ejercicio 15
-^^^^^^^^^^^^^
-
-¿Entonces qué usamos para leer la entrada?
-
-Ahora que conocemos mejor los punteros y los arreglos podemos explorar la
-función fgets: ``char *fgets(char *str, int n, FILE *stream)``. A esta
-función le debemos pasar la dirección del buffer donde queremos colocar
-los caracteres, la cantidad de caracteres y el flujo. fgets termina de leer
-el flujo cuando encuentre un ENTER. Dicho ENTER se saca del flujo
-
-Analiza el funcionamiento de fgets:
-
-.. code-block:: c
-    :linenos:
-
-    #include <stdio.h>
-
-    int main(void)
-    {
-        char name[40];
-        printf("What's your name? ");
-        if (fgets(name, 40, stdin))
-        {
-            printf("Hello %s!\n", name);
-        }
-    }
-
-NOTA que en **name** quedará también el ENTER. Entonces para eliminarlo
-simplemente hacemos: 
-
-.. code-block:: c
-    :linenos:
-
-    #include <stdio.h>
-    #include <string.h>
-
-    int main(void)
-    {
-        char name[40];
-        printf("What's your name? ");
-        if (fgets(name, 40, stdin))
-        {
-            name[strcspn(name, "\n")] = 0;
-            printf("Hello %s!\n", name);
-        }
-    }
-
-**strcspn** buscará en la cadena **name** el primer *match* con
-``\n`` y devolverá la posición en **name** en la cual fue encontrado
-el *match*. 
-
-Ejercicio 16
-^^^^^^^^^^^^^^
-
-(Este ejercicio es tomado de `aquí <https://www.geeksforgeeks.org/pointer-array-array-pointer/>`__)
+(Este ejercicio es adaptado de `aquí <https://www.geeksforgeeks.org/pointer-array-array-pointer/>`__)
 
 Relación arreglos y punteros
 
-.. code-block:: c
+.. code-block:: rust
     :linenos:
 
-    #include<stdio.h> 
+    unsafe {
+        let mut arr: [i32; 5] = [0;5];
+        let mut p: *mut i32;
+        let mut ptr : *mut [i32;5];
 
-    int main() 
-    { 
-        int *p;  
-        int (*ptr)[5];  
-        int arr[5]; 
-        
-        p = arr; 
-        ptr = &arr;  
-        printf("p = %p, ptr = %p\n", p, ptr); 
-        p++;  
-        ptr++; 
-        printf("p = %p, ptr = %p\n", p, ptr); 
-        return 0; 
+        p = arr.as_mut_ptr();
+        ptr = &mut arr;
+
+        println!("p = {:p}, ptr = {:p}", p, ptr);
+
+        p = p.add(1);
+        ptr = ptr.add(1);
+        println!("p = {:p}, ptr = {:p}", p, ptr);
     }
 
 Ejecuta el programa anterior. El resultados es:
@@ -478,87 +394,100 @@ Ejecuta el programa anterior. El resultados es:
     p = 0x7fff4f32fd54, ptr = 0x7fff4f32fd64
 
 
-En la expresión ``int * p;`` p es una variable de tipo
-``int *``. En este tipo de variables se almacenan las
-``direcciones`` de variables de tipo ``int``. Por tanto, ``*p``
-(sin colocar int antes del ``*``) es de tipo ``int`` porque 
-p es de tipo ``int *``.
+En la expresión ``let mut p: *mut i32;`` p es una variable de tipo
+``i32 *``. En este tipo de variables se almacenan las
+``direcciones`` de variables de tipo ``i32``. Por tanto, ``*p``
+(sin colocar i32 antes del ``*``) es de tipo ``i32`` porque 
+p es de tipo ``i32 *``.
 
-En la expresión ``int (*ptr)[5];`` ptr es una variable de tipo
-``int (*)[5]``. En este tipo de variables se almacenan direcciones
-de variables de tipo ``int [5]``, es decir, variables de tipo
+En la expresión ``let mut ptr : *mut [i32;5];`` ptr es una variable de tipo
+``* [i32;5]``. En este tipo de variables se almacenan direcciones
+de variables de tipo ``[i32;5]``, es decir, variables de tipo
 arreglo de cinco posiciones. Por tanto, ``*ptr`` es de tipo 
-``int [5]`` porque ptr es de tipo ``int (*)[5]``.
+``[i32;5]`` porque ptr es de tipo ``i32 (*)[5]``.
 
-En la expresión ``p = arr;`` arr es el nombre del arreglo y un puntero
+En la expresión ``p = arr.as_mut_ptr();`` arr es el nombre del arreglo y un puntero
 al primer elemento del arreglo.
-En este caso `arr` es de tipo ``int *`` porque el primer elemento
-del arreglo es de tipo ``int``. Por tanto, ``*arr`` 
-será tipo ``int``.
+En este caso `arr` es de tipo ``i32 *`` porque el primer elemento
+del arreglo es de tipo ``i32``. Por tanto, ``*arr`` 
+será tipo ``i32``.
 
 En la expresión ``ptr = &arr;`` ``&arr`` es la dirección del arreglo.
-``&arr`` es tipo ``int (*)[5]``.
+``&arr`` es tipo ``i32 (*)[5]``.
 
-La expresión ``printf("p = %p, ptr = %p\n", p, ptr);`` imprime el
+La expresión ``println!("p = {:p}, ptr = {:p}", p, ptr);`` imprime el
 contenido de p y ptr. Según el resultado
 ``(p = 0x7fff4f32fd50, ptr = 0x7fff4f32fd50`)``, la dirección del
 arreglo y del primer elemento del arreglo es la misma; sin embargo,
-como p es tipo ``int *``, la expresión ``p++`` hará que p apunte
+como p es tipo ``i32 *``, la expresión ``p.add(1);`` hará que p apunte
 (almacene la dirección) al siguiente entero. En cambio, en la
-expresión ``ptr++;`` ptr apuntará al siguiente arreglo de 5
+expresión ``ptr.add(1);`` ptr apuntará al siguiente arreglo de 5
 enteros (5 enteros ocupan 20 bytes en memoria considerando
 que cada entero ocupa 4 bytes), ya que ptr es de tipo
-``int (*)[5]``.
+``i32 (*)[5]``.
 
-Ejercicio 17: análisis de una expresión más compleja
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Ejercicio 14: Análisis de una expresión más compleja
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 El siguiente ejercicio es más complejo que el anterior, sin embargo,
 se analiza de igual manera. Considera el siguiente código:
 
-.. code-block:: c
+.. code-block:: rust
     :linenos:
 
-    #include <stdio.h>
-
-    int arr[3][4] = { {1,2,3,4}, {5,6,7,8}, {9,10,11,12} };
-
-    int main(void) {
-        int (*p)[3][4] = &arr;
-        printf("%d\n", ( (*p)[2] )[3] );
-        printf("%d\n", *( *(*p + 2) + 3 ) );
-        return 0;
+    unsafe{
+        let arr: [[i32;4];3] = [ [1,2,3,4], [5,6,7,8], [9,10,11,12]];
+    
+        let p: *const [[i32;4];3] = &arr;
+    
+        println!("{}", ((*p)[2])[3]);
+        println!("{}",  *(*(*p).as_ptr().offset(2)).as_ptr().offset(3));
     }
 
 
-``arr`` es un arreglo de arreglos, es decir, es una arreglo de 3 arreglos
+``arr`` es un arreglo de arreglos, es decir, es un arreglo de 3 arreglos
 de 4 enteros cada uno.
 
 ``arr`` es el nombre del arreglo de arreglos y un puntero al primer elemento
-del arreglo. Por tanto, ``arr`` es de tipo ``int (*)[4]`` ya que el primer elemento
-de arr es un arreglo de tipo ``int [4]``.
+del arreglo. Por tanto, ``arr`` es de tipo ``i32 (*)[4]`` ya que el primer elemento
+de arr es un arreglo de tipo ``i32 [4]``.
 
 ``p`` es un puntero que almacena la dirección de un arreglo de arreglos.
-Por tanto, p es de tipo ``int (*)[3][4]``.
+Por tanto, p es de tipo ``i32 (*)[3][4]``.
 
-Si ``p`` es de tipo ``int (*)[3][4]`` entonces ``*p`` será de tipo ``int [3][4]`` o
-``int (*)[4]`` (un puntero al primer elemento del arreglo de arreglos).
+Si ``p`` es de tipo ``i32 (*)[3][4]`` entonces ``*p`` será de tipo ``i32 [3][4]`` o
+``i32 (*)[4]`` (un puntero al primer elemento del arreglo de arreglos).
 
-El operador ``[]`` en la expresión ``(*p)[2]`` es equivalente a ``*( *p + 2)``.
-Como el tipo de ``(*p + 2)`` es ``int (*)[4]`` el tipo de ``*( *p + 2)``
-será ``int [4]``. la expresión ``(*p)[2]`` accede al tercer elemento de arr, es
-decir, a ``{9,10,11,12}`` que es de tipo ``int [4]``.
+El operador ``[]`` en la expresión ``(*p)[2]`` es equivalente a ``*( *p.offset(2))``.
+Como el tipo de ``(*p.offset(2))`` es ``i32 (*)[4]`` el tipo de ``*( *p.offset(2))``
+será ``i32 [4]``. la expresión ``(*p)[2]`` accede al tercer elemento de arr, es
+decir, a ``{9,10,11,12}`` que es de tipo ``i32 [4]``.
 
-Por último, como ``(*p)[2]`` es tipo ``int [4]``, entonces ``( (*p)[2] )[3] )`` es
-tipo int y corresponderá al cuarto elemento del tercer arreglo de arr.
+Por último, como ``(*p)[2]`` es tipo ``i32[4]``, entonces ``( (*p)[2] )[3] )`` es
+tipo i32 y corresponderá al cuarto elemento del tercer arreglo de arr.
 
 Nota que ``( (*p)[2] )[3] )`` es equivalente a ``*( (*p)[2] + 3)`` que a su
-vez es equivalente a  ``*( * ( *p + 2)+ 3)``
+vez es equivalente a  ``*( * ( *p.offset(2)).as_ptr().offset(3))``
 
 El programa imprimirá el número ``12``.
 
-La expresión ``printf("%d\n", *( * ( *p + 2)+ 3));`` al ser equivalente a
-``printf("%d\n", ( (*p)[2] )[3] );`` también mostrará un ``12``.
+La expresión ``println!("{}",  *(*(*p).as_ptr().offset(2)).as_ptr().offset(3));`` al ser equivalente a
+``println!("{}", ((*p)[2])[3]);`` también mostrará un ``12``.
+
+
+Ejercicio 15
+^^^^^^^^^^^^^
+
+
+Ejercicio 16
+^^^^^^^^^^^^^^
+
+
+
+Ejercicio 17: 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
 
 Ejercicio 18
 ^^^^^^^^^^^^^
