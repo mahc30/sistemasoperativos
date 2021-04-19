@@ -519,7 +519,7 @@ El siguiente código muestra una posible solución:
     	read_user_input(&mut buffer);
     
    	 let n : usize = buffer.trim().parse().unwrap();
-   	 let mut data : Vec<i32> = Vec::new();
+   	 let mut data : Vec<i32> = Vec::with_capacity(n);
     
    	 for i in 0..n {
     
@@ -529,16 +529,17 @@ El siguiente código muestra una posible solución:
     	    let elem : i32 = buffer.trim().parse().unwrap();
     	    data.push(elem);
    	 }
+        print_array(&mut data);
     
-   	 print_array(&mut data);
-
   	 println!("Ingrese la posición donde quiere insertar");
-  	read_user_input(&mut buffer);
+  	 read_user_input(&mut buffer);
  	 let mut position : usize = buffer.trim().parse().unwrap();
  	 position = position - 1;
+    
+      data.push(0); //El vector necesita un nuevo espacio para mover los dato antes de la inserción
   
- 	 for i in data.len() - 1..position{
-  	  data[i+1] = data[i];
+ 	 for i in (position..data.len() - 1).rev() {
+  	    data[i+1] = data[i];
   	}
   
  	 println!("Ingrese el valor a insertar");
@@ -546,72 +547,37 @@ El siguiente código muestra una posible solución:
 
  	 data[position] = buffer.trim().parse().unwrap();
 
-	  print_array(&mut data);
+	 print_array(&mut data);
 	}
 
 Ejercicio 16
 ^^^^^^^^^^^^^^
 
+Analiza con detenimiento el siguiente ejemplo:
 
+* Utiliza el *debugger* de eclipse.
+* Agrega un breakpoint para que el programa pare antes de terminar.
+* En la pestaña de variables como se muestra en la imagen de más abajo haz click derecho sobre una de las posiciones de la variable nombres y selecciona "View Memory".
+* Mira cómo se guardan las cadenas en memoria.
+
+.. code-block:: rust
+
+    let nombres : [[char; 10]; 3] = [['F','u','l','a','n','o', '\0', '\0', '\0', '\0'], ['M','e','n','g','a','n','o', '\0', '\0', '\0'], ['P','e','r','a','n','o', '\0', '\0', '\0', '\0']];
+
+
+.. image:: \../_static/unidad_1/vista_memoria.png
 
 Ejercicio 17: 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-
-
-Ejercicio 18
-^^^^^^^^^^^^^
-
-
-
-Ejercicio 19
 ^^^^^^^^^^^^^^^^
 
 Repasa el manejo de archivos y la gestión de errores. 
 Lee esta información:
 
-* `Manejo básico <https://www.geeksforgeeks.org/basics-file-handling-c/>`__
-* `¿Fin de un archivo o un error? <https://www.geeksforgeeks.org/eof-and-feof-in-c/>`__
-* `¿Cómo vamos a gestionar los errores en C? <https://www.geeksforgeeks.org/error-handling-c-programs/>`__
+* `¿Cómo vamos a gestionar los errores en Rust? <https://doc.rust-lang.org/nightly/book/ch09-02-recoverable-errors-with-result.html>`__
 
-Ejercicio 20
-^^^^^^^^^^^^^^^
+Ejercicio 18
+^^^^^^^^^^^^^
 
-Analiza con detenimiento el siguiente ejemplo:
-
-* Utiliza el *debugger* de eclipse.
-* Mira cómo se guardan las cadenas en memoria.
-
-.. code-block:: c
-   :linenos:
-
-    #include <stdio.h>
-
-    char nombres[3][20] = {"fulano","mengano","perano"};
-
-    int main (void){
-
-        char *a;
-        char (*b)[20];
-        char *c;
-        char (*d)[3][20];
-
-        a = &nombres[0][0];
-        printf("el nombre es %s \n", a);
-        b = nombres;
-        c = &nombres[0][0];
-        d = &nombres;
-
-        for(int i = 0; i < 3; i++ ){
-            printf("char (*)[] el nombre[%d] es %s \n", i , (char * ) (b+i));
-            printf("char *: el nombre[%d] es %s \n", i , (char * ) ( c + (i*2) ));
-            printf("char (*)[][]: el nombre[%d] es %s \n", i , (char * ) (d+i));
-        }
-        return 0;
-    }
-
-Ejercicio 21
-^^^^^^^^^^^^^^
 
 Escribe una función que te permita encontrar los elementos comunes de
 dos arreglos de enteros. El encabezado de la función es:
@@ -619,8 +585,7 @@ dos arreglos de enteros. El encabezado de la función es:
 .. code-block:: c
    :linenos:
 
-
-    uint8_t arrayCommon(int32_t* arr1, int32_t arr1Size,int32_t* arr2, int32_t arr2Size, int32_t* arrRes, int32_t arrResSize)
+    fn arrayCommon(arr1: &mut [i32], arr2: &mut [i32], arrRes: &mut [i32])
 
 * La función debe recibir las direcciones de memoria de los dos arreglos
   a comparar y del arreglo resultado. También debe recibir el tamaño de
@@ -645,8 +610,8 @@ El flujo del programa será:
 * Indicar cuántos elementos comunes se encontraron y el arreglo
   con dichos elementos.
 
-Ejercicio 22
-^^^^^^^^^^^^^^
+Ejercicio 19
+^^^^^^^^^^^^^^^^
 
 En este ejercicio te propongo encriptar y desencriptar un archivo
 
@@ -690,66 +655,80 @@ funcionalidad solicitada.
           y desencriptar) es necesario que crees el archivo de texto que
           será encriptado.
 
-.. code-block:: c
+.. code-block:: rust
     :linenos:
 
-    #include <stdint.h>
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include <string.h>
+    use std::fs;
+    use std::io::{stdin, stdout, Write};
+    use std::fs::OpenOptions;
 
-    uint8_t encXorFunction(uint8_t data) { return data ^ 0xFF; }
+    fn main() {
 
-    int main(int argc, char *argv[]) {
-    char input[50];
-    char inFile[20];
-    char outFile[20];
-    char function[10];
-    uint8_t (*encFuntion)(uint8_t) = NULL;
+    
+        let mut command = String::new();
 
-    printf("Enter in_file out_file function\n");
-    fgets(input, sizeof(input), stdin);
-    sscanf(input, "%s %s %s", inFile, outFile, function);
+        println!("Enter in_file out_file function\n");
+        read(&mut command);
 
-    FILE *fin = fopen(inFile, "r");
-    if (fin == NULL) {
-        perror("Error: ");
-        return EXIT_FAILURE;
+        let instructions : Vec<String> = command.split(" ").map(|s| s.to_string()).collect();
+
+        let in_file  = String::from(instructions[0].clone().trim());
+        let out_file = String::from(instructions[1].clone().trim());
+        let function = String::from(instructions[2].clone().trim());
+
+        let path: String = format!("./{}.txt", in_file.trim());
+
+        let in_file_buffer = fs::read_to_string(path).expect("Error leyendo el archivo");
+
+        // Abrir archivo de salida
+        let mut out = OpenOptions::new()
+        .write(true)
+        .append(true)
+        .create(true)
+        .open(out_file)
+        .unwrap();
+
+        for mut character in in_file_buffer.chars() {
+            match function.as_str() {
+                "xor" => character = enc_xor_function(character as u8) as char,
+                _ => character = character,
+            }
+
+            if let Err(e) = write!(out, "{}", character as char) {
+                eprintln!("Couldn't write to file: {}", e);
+            }
+        }    
     }
 
-    if (strncmp("xor", function, 3) == 0) {
-        encFuntion = &encXorFunction;
+    fn enc_xor_function(data : u8) ->  u8{
+        data ^ 0xFF
     }
 
-    FILE *fout = fopen(outFile, "w");
-    if (fout == NULL) {
-        perror("Error: ");
-        return EXIT_FAILURE;
+    fn read(input: &mut String) {
+        stdout().flush().expect("Couldn't flush in_file_buffer");
+        stdin().read_line(input).expect("Failed to read");
     }
 
-    while ( fgets(input, sizeof(input), fin) != NULL) {
 
-        int n = strlen(input);
-
-        for (int i = 0; i < n; i++) {
-        input[i] = (*encFuntion)(input[i]);
-        }
-        fputs(input, fout);
-    }
-
-    fclose(fin);
-    fclose(fout);
-    return EXIT_SUCCESS;
-    }
-
-Ejercicio 23
-^^^^^^^^^^^^^^
+Ejercicio 20
+^^^^^^^^^^^^^^^
 
 Modifica el código anterior para que reciba
 la información como argumentos de la función main,
 al ejecutar el programa. NO DEBES SOLICITAR información
 al usuario, todas la información será pasada cuando
 se invoque el ejecutable en línea de comandos.
+
+Ejercicio 21: Macros
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Ejercicio 22
+^^^^^^^^^^^^^^
+
+Ejercicio 23
+^^^^^^^^^^^^^^
+
+
 
 Ejercicio 24
 ^^^^^^^^^^^^^^
