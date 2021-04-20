@@ -126,7 +126,108 @@ En esta unidad vamos a aprender un nuevo lenguaje de programación, es simple
 pero muy poderoso. En este :doc:`enlace <../_guias/guias>` 
 encontrarás una guía básica de Rust.
 
-Ejercicio 5: Strings
+Ejercicio 5: Strings en Rust
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+En Rust los strings son una colección de bytes, cuando hablamos de Strings
+nos referimos tanto al objeto String cómo al slice ``&str``, que son referencias
+a strings UTF-8 guardadas en alguna parte de la memoria.
+
+Muchas de las operaciones que el tipo ``Vec`` implementa también están presentes en la clase ``String``.
+
+.. code-block:: rust
+
+    //Inicializar String
+    let mut myString = String::new();
+
+    //Inicializar String desde un literal
+    let mut s1 = "esto es un literal".to_string();
+    let mut s2 = String::from(" y esta es otra forma de hacer lo mismo");
+
+    //Modificar String
+    s1.push(s2);
+    //"Esto es un literal y esta es otra forma de hacer lo mismo"
+
+    //Concatenar varios strings
+    let mut s3 = String::from("Hola");
+    let mut s4 = String::from("Mundo");
+    let mut s5 = format!("{} {}", s3, s4);
+
+    
+Ejercicio 6: Indexando Strings
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+En C los Strings eran usados como arreglos de caracteres y referencias, por ejemplo:
+
+.. code-block:: c
+
+    char nombres[3][20] = {"fulano","mengano","perano"};
+
+``nombres`` es un arreglo de arreglos, es decir, un arreglo de 3 arreglos de 20 caracteres cada uno.
+Por lo que es posible acceder a cada uno de los caracteres con un índice.
+
+.. code-block:: c
+
+    printf("%c", nombres[2][1]);
+    //e
+
+Pero en Rust no es posible por la forma en que está implementada la clase. String es un *Wrapper* para un ``Vec<u8>``. 
+Veamos ejemplos de strings codificadas en formato `UTF-8 <https://es.wikipedia.org/wiki/UTF-8>`__
+Ejemplos tomados del `libro oficial de Rust <https://doc.rust-lang.org/nightly/book/ch08-02-strings.html>`__
+
+.. code-block:: rust
+
+    let hello = String::from("Hola");
+
+En este caso ``hello.len()`` es 4, lo que significa que el vector almacenando "Hola" tiene 4 bytes de largo.
+Porque cada una de estas letras toma 1 byte cuando están codificadas en UTF-8.
+
+.. code-block:: rust
+
+    let hello = String::from("Здравствуйте");
+    
+
+Ahora, si bien parece que son 12 caracteres, ``len()`` es 24, porque 24 son los bytes que se necesitan para
+codificar "Здравствуйте" en UTF-8, porque cada valor escalar en este String toma 2 bytes de almacenamiento.
+
+Es por esto que indexar los strings puede hacer referencia a un valor escalar Unicode inválido.
+
+.. code-block:: rust
+
+    let hello = String::from("Здравствуйте");
+    let hello = "Здравствуйте";
+    let answer = &hello[0];
+
+
+¿Cuál debería ser el valor de ``answer``? ¿Debería  ser ``З``, la primera letra?
+Cuando los Strings están codificados en UTF-8, el primer byte de ``З`` es ``208`` y el segundo es ``151``,
+por lo tanto la respuesta sería ``208``, pero ``208`` no es un caracter válido por si mismo. Retornar el ``208``
+no es lo que espera el usuario, pero es toda la información que tenemos disponible en ``&hello[0]``
+
+Ejercicio 7
+^^^^^^^^^^^^^^
+
+Rust ofrece muchos métodos para manipular strings sin tener que recurrir a apuntadores y bytes.
+
+Por ejemplo para iterar sobre caracteres individuales unicode podemos usar el método ``chars()`` que retorna
+valores de tipo char que pueden ser iterados.
+
+.. code-block:: rust
+
+    for c in "नमस्ते".chars() {
+        println!("{}", c);
+    }
+
+Retorna
+
+न
+म
+स
+्
+त
+े
+
+Ejercicio 8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 En la guía introductoria del lenguaje Rust vimos un ejemplo de
@@ -202,7 +303,7 @@ obtener un iterador del string, y luego al método ``next()`` del iterador para 
 - ¿Qué es el **newline character**?
 - ¿Qué hace la función ``trim()``?
 
-Ejercicio 6: I/O
+Ejercicio 9: I/O
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Crea una función que reciba un apuntador a una variable tipo String y guarde el input del usuario en la dirección de esa variable
@@ -225,7 +326,7 @@ Crea una función que reciba un apuntador a una variable tipo String y guarde el
 
 |
 
-Ejercicio 7: Parsing
+Ejercicio 10: Parsing
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Vamos a continuar con el código del ejemplo anterior, agrega a tu código las siguientes modificaciones:
@@ -282,7 +383,7 @@ Ejecuta el código anterior y responde:
 - 🐧
 - ¿Qué valores en hexadecimal tienen? ¿Cuántos bytes fueron leídos en cada caso?
 
-Ejercicio 8
+Ejercicio 11
 ^^^^^^^^^^^^^
 
 - ¿Qué ocurre si cuando nos pida ingresar un número ingresamos una palabra?
@@ -302,7 +403,7 @@ Ejercicio 8
 
 |
 
-Ejercicio 9: Pattern Matching
+Ejercicio 12: Pattern Matching
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Otra expresión nueva que usamos en la guía fue ``match`` para codificar manejo de errores cuando leemos
@@ -314,7 +415,7 @@ input del usuario, pero esta expresión tiene muchos más usos, analiza el sigui
 - Modifica el programa para que la variable op sea un valor asignado por el usuario y prueba ingresando los caracteres `+` `-` `*` `/` `a`.
 - ¿Cuáles son los resultados?
 
-Ejercicio 10
+Ejercicio 13
 ^^^^^^^^^^^^^^
 
 Las expresiones ``match`` consisten de un **value**, y varios **arms** con patrones y expresiones para 
@@ -345,7 +446,7 @@ ser ejecutadas en caso de que el **value** sea el mismo que el del patrón.
 
 |
 
-Ejercicio 11: Wildcard Pattern
+Ejercicio 14: Wildcard Pattern
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Usar ``_`` como patrón es usado para ignorar valores que no nos interesan o que no coinciden con alguno de los patrones
@@ -354,13 +455,13 @@ de que el caracter ĺeido no sea alguna de las operaciones indicadas.
 
 - Haz un programa que con solo un ``match`` imprima "Es positivo", "Es negativo" o "Es cero" según sea el caso.
 
-Ejercicio 12
+Ejercicio 15
 ^^^^^^^^^^^^^^
 
 Programa una calculadora que permita sumar, restar, dividir o multiplicar dos números. El usuario debe poder
 terminar el programa escribiendo 'N' o 'n'. 
 
-Ejercicio 13 Arreglos y Punteros
+Ejercicio 16: Arreglos y Punteros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 (Este ejercicio es adaptado de `aquí <https://www.geeksforgeeks.org/pointer-array-array-pointer/>`__)
@@ -426,7 +527,7 @@ enteros (5 enteros ocupan 20 bytes en memoria considerando
 que cada entero ocupa 4 bytes), ya que ptr es de tipo
 ``i32 (*)[5]``.
 
-Ejercicio 14: Análisis de una expresión más compleja
+Ejercicio 17: Análisis de una expresión más compleja
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 El siguiente ejercicio es más complejo que el anterior, sin embargo,
@@ -475,7 +576,7 @@ La expresión ``println!("{}",  *(*(*p).as_ptr().offset(2)).as_ptr().offset(3));
 ``println!("{}", ((*p)[2])[3]);`` también mostrará un ``12``.
 
 
-Ejercicio 15
+Ejercicio 18
 ^^^^^^^^^^^^^
 
 Te propongo que realices un programa que:
@@ -550,7 +651,7 @@ El siguiente código muestra una posible solución:
 	 print_array(&mut data);
 	}
 
-Ejercicio 16
+Ejercicio 19
 ^^^^^^^^^^^^^^
 
 Analiza con detenimiento el siguiente ejemplo:
@@ -567,7 +668,7 @@ Analiza con detenimiento el siguiente ejemplo:
 
 .. image:: \../_static/unidad_1/vista_memoria.png
 
-Ejercicio 17: 
+Ejercicio 20
 ^^^^^^^^^^^^^^^^
 
 Repasa el manejo de archivos y la gestión de errores. 
@@ -575,9 +676,8 @@ Lee esta información:
 
 * `¿Cómo vamos a gestionar los errores en Rust? <https://doc.rust-lang.org/nightly/book/ch09-02-recoverable-errors-with-result.html>`__
 
-Ejercicio 18
+Ejercicio 21
 ^^^^^^^^^^^^^
-
 
 Escribe una función que te permita encontrar los elementos comunes de
 dos arreglos de enteros. El encabezado de la función es:
@@ -610,7 +710,7 @@ El flujo del programa será:
 * Indicar cuántos elementos comunes se encontraron y el arreglo
   con dichos elementos.
 
-Ejercicio 19
+Ejercicio 22
 ^^^^^^^^^^^^^^^^
 
 En este ejercicio te propongo encriptar y desencriptar un archivo
@@ -656,7 +756,6 @@ funcionalidad solicitada.
           será encriptado.
 
 .. code-block:: rust
-    :linenos:
 
     use std::fs;
     use std::io::{stdin, stdout, Write};
@@ -664,7 +763,6 @@ funcionalidad solicitada.
 
     fn main() {
 
-    
         let mut command = String::new();
 
         println!("Enter in_file out_file function\n");
@@ -676,9 +774,7 @@ funcionalidad solicitada.
         let out_file = String::from(instructions[1].clone().trim());
         let function = String::from(instructions[2].clone().trim());
 
-        let path: String = format!("./{}.txt", in_file.trim());
-
-        let in_file_buffer = fs::read_to_string(path).expect("Error leyendo el archivo");
+        let in_file_buffer = fs::read(in_file).expect("Error leyendo el archivo");
 
         // Abrir archivo de salida
         let mut out = OpenOptions::new()
@@ -688,9 +784,9 @@ funcionalidad solicitada.
         .open(out_file)
         .unwrap();
 
-        for mut character in in_file_buffer.chars() {
+        for mut character in in_file_buffer {
             match function.as_str() {
-                "xor" => character = enc_xor_function(character as u8) as char,
+                "xor" => character = enc_xor_function(character),
                 _ => character = character,
             }
 
@@ -710,46 +806,86 @@ funcionalidad solicitada.
     }
 
 
-Ejercicio 20
+Ejercicio 23
 ^^^^^^^^^^^^^^^
+
+Al comienzo de la unidad hablamos de cómo los Strings eran arreglos de bytes y que debíamos tener cuidado
+cuando los manipularamos. Habrás notado que el ejemplo anterior tiene un error a la hora de desencriptar un archivo.
+El error se debe a cómo estamos leyendo el archivo.
+
+En el ejemplo anterior usamos la función ``fs::read(&buffer)`` para leer un archivo, esta función retorna ``Vec<u8>``,
+que usamos para iterar sobre cada byte y aplicar la función de encriptado. Sin embargo el xor sobre los bytes no tiene en cuenta
+que estamos iterando caracteres en UTF-8, que podrían ser de entre 1 y 4 bytes. 
+
+Por lo que cuando escribimos el mensaje encriptado al archivo de salida estaremos escribiendo no solo los caracteres encriptados
+si no otros cuantos bytes de "basura". Por lo que al ser leido nuevamente y desencriptado el mensaje también estaremos pasando los bytes
+de basura a la función de desencriptado, lo que resulta en un mensaje distinto del original.
+
+Para solucionarlo debemos usar métodos y tipos de dato apropiados para manejar Strings y caracteres, para que cuando el programa lea
+los bytes los maneje como si fueran Strings y caracteres apropiados y no simples bytes por separado.
+
+Presta atención a los cambios, como ``fs::read_to_string()`` y ``"xor" => character = enc_xor_function(character as u8) as char``.
+
+.. code-block:: rust
+    :linenos:
+
+    use std::fs;
+    use std::io::{stdin, stdout, Write};
+    use std::fs::OpenOptions;
+    
+    fn main() {
+       
+        let mut command = String::new();
+    
+        println!("Enter in_file out_file function\n");
+        read(&mut command);
+    
+        let instructions : Vec<String> = command.split(" ").map(|s| s.to_string()).collect();
+        
+        let in_file  = String::from(instructions[0].clone().trim());
+        let out_file = String::from(instructions[1].clone().trim());
+        let function = String::from(instructions[2].clone().trim());
+    
+        let in_file_buffer = fs::read_to_string(in_file).expect("Error leyendo el archivo");
+    
+        // Abrir archivo de salida
+        let mut out = OpenOptions::new()
+        .write(true)
+        .append(true)
+        .create(true)
+        .open(out_file)
+        .unwrap();
+    
+        for mut character in in_file_buffer.chars() {
+            match function.as_str() {
+                "xor" => character = enc_xor_function(character as u8) as char,
+                _ => character = character,
+            }
+            
+            if let Err(e) = write!(out, "{}", character as char) {
+                eprintln!("Couldn't write to file: {}", e);
+            }
+        }    
+    }
+    
+    fn enc_xor_function(data : u8) ->  u8{
+        data ^ 0xFF
+    }
+    
+    fn read(input: &mut String) {
+        stdout().flush().expect("Couldn't flush in_file_buffer");
+        stdin().read_line(input).expect("Failed to read");
+    }
+
+
+Ejercicio 24
+^^^^^^^^^^^^^^
 
 Modifica el código anterior para que reciba
 la información como argumentos de la función main,
 al ejecutar el programa. NO DEBES SOLICITAR información
 al usuario, todas la información será pasada cuando
 se invoque el ejecutable en línea de comandos.
-
-Ejercicio 21: Macros
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Ejercicio 22
-^^^^^^^^^^^^^^
-
-Ejercicio 23
-^^^^^^^^^^^^^^
-
-
-
-Ejercicio 24
-^^^^^^^^^^^^^^
-
-Con este ejercicio vamos a responder una pregunta
-¿Qué son las directivas del preprocesador?
-
-El preprocesamiento es una característica muy propia de
-C que no es común a otros lenguajes de programación. Esta
-característica permite MODIFICAR el programa ANTES de pasárselo
-al compilador para que lo convierta en lenguaje ensamblador.
-
-Lo que debes hacer para usar el preprocesador es introducir en
-el código DIRECTIVAS, es decir, instrucciones que le das al
-preprocesador. Una vez el preprocesador lee tu programa, su tarea
-será remover las directivas y sustituirlas por código C que él
-mismo generará usando las instrucciones que tu le has dado con
-la directiva específica. Luego de este paso, tu programa estará
-listo para ser leído por el compilador.
-
-Ten en cuenta que las directivas comenzarán por el símbolo #.
 
 Ejercicio 25
 ^^^^^^^^^^^^^^
