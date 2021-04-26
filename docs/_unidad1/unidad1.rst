@@ -887,354 +887,119 @@ al ejecutar el programa. NO DEBES SOLICITAR información
 al usuario, todas la información será pasada cuando
 se invoque el ejecutable en línea de comandos.
 
-Ejercicio 25
-^^^^^^^^^^^^^^
+Ejercicio 25: Cargo
+^^^^^^^^^^^^^^^^^^^^^^
 
-Ahora te voy a mostrar algunos ejemplos de directiva que puedes
-usar o que probablemente ya has utilizado en este punto del curso:
+En Rust es muy fácil utilizar librerías externas, basta con buscar el `Crate <https://crates.io/>`__.
+Veamos el ejemplo del crate `ferris-says <https://crates.io/crates/ferris-says>`__.
 
-.. code-block:: c
+- Editar el archivo **Cargo.toml** agregando el nombre del crate que vamos a usar.
+
+.. code-block:: rust
+
+[dependencies]
+ferris-says = "0.2"
+
+- Importar el crate en nuestro código:
+
+.. code-block:: rust
     :linenos:
 
-    #define M 5
-    #define C 5
+    extern crate ferris_says;
 
-    int main(int argc, char* argv[]) {
-        int x = 2;
-        int y = x*M + C;
-        return 0;
+Por Ejemplo:
+
+.. code-block:: rust
+
+    extern crate ferris_says;
+
+    use ferris_says::say;
+    use std::io::{ stdout, BufWriter };
+
+    fn main() {
+        let out = b"Hello fellow Rustaceans!";
+        let width = 24;
+
+        let mut writer = BufWriter::new(stdout());
+        say(out, width, &mut writer).unwrap();
     }
 
-¿Cuál será el resultado en la variable ``y`` luego de ejecutar este programa?
-
-Para responder esta pregunta recuerda que antes de compilador
-el programa, el archivo se pasa al preprocesador. El resultado del preprocesador
-será algo similar a esto:
-
-.. code-block:: c
-    :linenos:
-
-    int main(int argc, char* argv[]) {
-        int x = 2;
-        int y = x*5 + 5;
-        return 0;
-    }
-
-Ahora si, este archivo, será pasado al compilador para que
-lo convierta en código ensamblador. La respuesta a la pregunta
-será 15.
-
-
-Mira este otro ejemplo:
-
-
-.. code-block:: c
-   :linenos:
-
-        #define M 5
-        #define C 5
-        #define MAP(val,m,c) val*m+c
-
-        int main(int argc, char* argv[]) {
-            int x = 2;
-            int y = MAP(x,M,C);
-            return 0;
-        }
-
-¿Qué crees que genere el preprocesador luego de procesar este
-archivo? 
-
-.. note::
-    ¡Alerta de Spoiler!
-
-    .. code-block:: c
-        :linenos:
-
-        int main(int argc, char* argv[]) {
-            int x = 2;
-            int y = x*5+5;
-            return 0;
-        }
-
-Otra forma de saber, ANTES de compilar, la salida del preprocesador es así:
-
-``gcc -E codigo.c``
-
-Por último prueba el comando anterior con este programa:
-
-.. code-block:: c
-   :linenos:
-
-        #include <stdio.h>
-        #define M 5
-        #define C 5
-        #define MAP(val,m,c) x*m+c
-
-        int main(int argc, char* argv[]) {
-            int x = 2;
-            int y = MAP(x,M,C);
-            printf("y: %d", y);
-            return 0;
-        }
-
-¿Qué puedes concluir de la directiva ``#include`` 
-
-Ejercicio 26
-^^^^^^^^^^^^^^
-
-Otro uso interesante del preprocesador es para las DIRECTIVAS
-de compilación condicional. 
-
-Estas directivas te permiten incluir un código u otro, dependiendo
-de una condición:
-
-.. code-block:: c
-   :linenos:
-
-    #include <stdio.h>
-
-    #define CONDITION
-    
-    int main(int argc, char* argv[]) {
-    
-        #ifdef CONDITION
-        printf("CODIGO IF\n");
-        #else
-        printf("CODIGO ELSE\n");
-        #endif
-        return 0;
-    }
-
-¿Cómo crees que quede el programa luego de ser preprocesado?
-
-.. note::
-    ¡Alerta de Spoiler!
-
-
-    Al definir ``CONDITION`` con la directiva ``#define CONDITION``
-    y con el comando ``gcc -E codigo.c`` el resultado es:
-
-    .. code-block:: c
-        :linenos:
-
-        int main(int argc, char* argv[]) {
-           printf("CODIGO IF\n");
-            return 0;
-        }
-
-
-Ejercicio 27
-^^^^^^^^^^^^^^
-
-¿Será posible definir una directiva para el preprocesador
-desde la línea de comandos?
-
-Volvamos al ejemplo anterior pero esta vez sin el ``#define CONDITION``
-
-.. code-block:: c
-   :linenos:
-
-    #include <stdio.h>
-
-    int main(int argc, char* argv[]) {
-    
-        #ifdef CONDITION
-        printf("CODIGO IF\n");
-        #else
-        printf("CODIGO ELSE\n");
-        #endif
-        return 0;
-    }
-
-¿Cuál será el resultado de compilar y ejecutar este programa?
-
-Compara el resultado obtenido con la salida del comando ``gcc -E codigo.c``.
-
-Ahora prueba este comando:
-
-``gcc -DCONDITION -E codigo.c``
-
-¿Cuál es el resultado?
-
-Y si compilas así:
-
-``gcc -DCONDITION -Wall codigo.c -o codigo``
-
-¿Qué conclusiones puedes sacar?
-
-Ejercicio 28
-^^^^^^^^^^^^^^
-
-¿Cómo llegamos del código fuente al binario (el ejecutable)?
-
-En el caso del lenguaje C se siguen unos pasos conocidos como el
-pipeline de compilación compuesto por 4 pasos: preprocesamiento,
-compilación, ensamblado y enlazado.
-
-IMPORTANTE: para poder conseguir un ejecutable desde el código fuente,
-es necesario que nuestro código pase por todas las etapas del pipeline
-de manera exitosa.
-
-Para ilustrar el proceso vamos a crear un programa compuesto por 3 archivos:
-dos archivos .c y un archivo .h. Todos los archivos estarán almacenados
-en el mismo directorio.
-
-min.h
-
-.. code-block:: c
-   :linenos:
-
-    #ifndef MIN_H
-    #define MIN_H
-    int min(int, int);
-    #endif
-
-min.c
-
-.. code-block:: c
-   :linenos:
-
-    #include "min.h"
-
-    int min(int a, int b){
-        if(a < b) return a;
-        else return b;
-    }
-
-main.c
-
-.. code-block:: c
-   :linenos:
-
-    #include "min.h"
-    #include <stdio.h>
-
-    int main(int argc, char* argv[]){
-        printf("the min value is: %d\n",min(1,2));
-        return 0;
-    }
-
-La idea será crear un ejecutable partiendo de estos tres archivos.
-Ten presente que los archivos ``.h`` se usan para informarle al compilador
-qué tipo de datos recibe la función min y qué tipo de dato devuelve. Los
-archivos .h no se compilan, solo los archivos ``.c``.
-
-Compilamos primero ``min.c``:
-
-* Preprocesamiento:  ``gcc -E min.c``. Al ejecutar este comando nota como
-  el preprocesador incluye la información de min.h a min.c
-
-* Compilación: ejecuta el comando ``gcc -S min.c``. La opción ``-S`` le indica 
-  al comando ``gcc`` que debe hacer el proceso anterior (preprocesador) y con la
-  salida de este paso alimentar al compilador y detenerse en ese punto. El archivo
-  de salida generado será ``min.s`` que contendrá el código ensamblador.
+Imprime: 
+
+.. code-block:: rust
+
+    __________________________
+    < Hello fellow Rustaceans! >
+     --------------------------
+            \
+             \
+                _~^~^~_
+            \) /  o o  \ (/
+              '_   -   _'
+              / '-----' \
+
+Ejercicio 26: Macros
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Hasta el momento habíamos hablado que los macros en Rust son diferentes de las funciones y que se pueden identificar por
+el ``!`` como en ``println!()``. Los macros son fundamentalmente una forma de escribir código que escribe más código, también 
+conocido como *metaprogramming*. Uno de sus mayores ventajas y diferencias con las funciones es que podemos escribir
+macros que toman ua cantidad variable de parámetros, así como lo hemos visto con el ``println("{1} {2} ... {n}, a, b, ..., n)``.
+
+Además tienen un impacto sobre el proceso de compilación pues deben ser expandidos antes de que el código sea compilado, las desventajas
+de los macros es que suelen ser más complicados de escribir, leer y mantener debido a su naturaleza de ser código en rust que genera más 
+código.
+
+Ejercicio 27: Proceso de Compilación 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Veamos cómo se transforma el código que escribimos en Rust en un ejecutable. Hasta el momento solo hemos visto como se compila un programa 
+con el comando ``rustc`` o compilamos indirectamente e intermediatamente ejecutamos el progama usando ``cargo run``, pero no hemos visto qué hace
+la máquina para llegar a los resultados.
+
+Ya habíamos visto que para compilar con rustc solo usabamos ``rustc <ruta_del_programa>``, generando directamente el ejecutable, pero no nos dice
+cómo lo hizo. Para ver el proceso de compilación vamos a pasar `argumentos a rustc <https://doc.rust-lang.org/rustc/command-line-arguments.html>`__.
+Ejecutar los siguientes comandos puede causar un error "the option -Z is only accepted on the nightly compiler", para solucionarlo corre en la terminal:
 
 .. code-block:: bash
 
-        .file	"min.c"
-        .text
-        .globl	min
-        .type	min, @function
-    min:
-    .LFB0:
-        .cfi_startproc
-        endbr64
-        pushq	%rbp
-        .cfi_def_cfa_offset 16
-        .cfi_offset 6, -16
-        movq	%rsp, %rbp
-        .cfi_def_cfa_register 6
-        movl	%edi, -4(%rbp)
-        movl	%esi, -8(%rbp)
-        movl	-4(%rbp), %eax
-        cmpl	-8(%rbp), %eax
-        jge	.L2
-        movl	-4(%rbp), %eax
-        jmp	.L3
-    .L2:
-        movl	-8(%rbp), %eax
-    .L3:
-        popq	%rbp
-        .cfi_def_cfa 7, 8
-        ret
-        .cfi_endproc
-    .LFE0:
-        .size	min, .-min
-        .ident	"GCC: (Ubuntu 9.3.0-10ubuntu2) 9.3.0"
-        .section	.note.GNU-stack,"",@progbits
-        .section	.note.gnu.property,"a"
-        .align 8
-        .long	 1f - 0f
-        .long	 4f - 1f
-        .long	 5
-    0:
-        .string	 "GNU"
-    1:
-        .align 8
-        .long	 0xc0000002
-        .long	 3f - 2f
-    2:
-        .long	 0x3
-    3:
-        .align 8
-    4:
+    rustup default nightly
 
-* Ensamblado: en esta fase se gera el código máquina.
-  ``as min.s -o min.o``. También es posible generar el código de
-  máquina con el comando ``gcc -c min.c``
+En los siguientes ejercicios vamos a ver detalladamente lo que significan los pasos de la siguiente imagen, que representa los
+`pasos de compilación de un programa en Rust <Tomada de: https://blog.rust-lang.org/2016/04/19/MIR.html>`__.
 
-* Debemos repetir este proceso con todos los archivos ``.c`` de nuestro
-  proyecto: ``gcc -c main.c``. Ten presente que el comando anterior
-  ejecutará automáticamente todos los pasos previos, es decir, el preprocesado,
-  la compilación y el proceso de ensamblado.
+.. image:: \../_static/unidad_1/compilation_steps.png
 
-* Enlazado: una vez tengas todos los archivos ``.o`` lo último que debes hacer
-  es enlazar todos los archivos para generar un archivo ejecutable. Este archivo
-  contiene el código de máquina de todos los ``.o`` pero organizado en un formato
-  específico. En el caso de Linux el formato típico es ``.ELF``. Ejecuta el siguiente
-  comando para enlazar: ``ld min.o main.o``. Verás el siguiente resultado:
+Ejercicio 28: Lexing and Parsing
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. code-block:: c
-   :linenos:
+El primer paso es `'Lexing and Parsing' <https://rustc-dev-guide.rust-lang.org/the-parser.html>`__. Esto es que el compilador
+va a leer los caracteres unicode de nuestro progama y convertirlos en algo con lo que el compilador puede trabajar más cómodamente
+que si fueran solo Strings. Esto se hace en dos pasos:
 
-    ld: warning: cannot find entry symbol _start; defaulting to 0000000000401000
-    ld: main.o: in function main:
-    main.c:(.text+0x31): undefined reference to printf
+El `LEXER o ANÁLISIS LÉXICO <https://en.wikipedia.org/wiki/Lexical_analysis>`__. Su propósito es obtener una representación
+intermedia del programa conocida como stream of tokens. Por ejemplo, supongamos la siguiente
+expresión en un lenguaje de programación arbitrario: ``print hola``. Un token es una unidad
+indivisible que consiste de un tipo y un valor. En la expresión anterior el primer token es de
+tipo Identificador y el valor es print. El segundo token es de tipo CADENA y el valor es hola.. 
 
-Este resultado indica que no fue posible generar el ejecutable 
-(`` main.c:(.text+0x31): undefined reference to printf``). Pero ¿Por qué?
-La razón es que nos falta el archivo con el código de máquina de la función ``printf``.
-Esta función está prototipada en el archivo de cabecera (``stdio.h``), pero el archivo
-no contiene el código fuente de ``printf``. ¿Y dónde está el código entonces? este
-código hace parte de la biblioteca `glibc <https://www.gnu.org/software/libc/>`__ 
-que debes tener en tu sistema operativo y que contiene el código de máquina de varias
-funciones, entre ellas, ``printf``.
+Otro ejemplo: ``a.b + c`` es convertido en el stream de tokens `a`,`.`,`b`,`+` y `c`.
 
-Una forma fácil de generar el ejecutable es utilizar de nuevo ``gcc``. Este comando
-se encargará de suministrarle a ``ld`` todo los archivos con código máquina necesarios para
-generar nuestro ejecutable: ``gcc min.o main.o -o main``.
+.. note:: `¿Alguien quiere porfavor pensar en la notación polaca inversa? <https://es.wikipedia.org/wiki/Notaci%C3%B3n_polaca_inversa>`__.
 
-Ejercicio 29
-^^^^^^^^^^^^^^
+El `PARSER <https://es.wikipedia.org/wiki/Analizador_sint%C3%A1ctico>`__. Su propósito es validar si la sintaxis de el programa es válida o no.
+Por tanto, a esta fase se le conoce como análisis sintáctico. El PARSER toma la gramática formal
+del lenguaje y trata de hacer un match con el texto del programa. En términos simples, la gramática
+formal del lenguaje es el conjunto de reglas que se deben seguir para usar correctamente las
+'palabras' definidas por el lenguaje. El PARSER valida si el programa que escribiste cumple las
+reglas definidas en la gramática y si todo está bien produce una representación intermedia 
+del programa conocida como AST o Abstract Syntax Tree.
+
 
 Ahora que ya sabemos cómo se transforma un programa del código fuente al lenguaje de máquina,
 podemos indagar un poco más en las fases. ¿Cómo funciona un compilador?
 
 Un compilador también funciona por fases. Así:
-
-* La primera fase es el TOKENIZER o el análisis léxico. Su propósito es obtener una representación
-  intermedia del programa conocida como stream of tokens. Por ejemplo, supongamos la siguiente
-  expresión en un lenguaje de programación arbitrario: ``print hola``. Un token es una unidad
-  indivisible que consiste de un tipo y un valor. En la expresión anterior el primer token es de
-  tipo Identificador y el valor es print. El segundo token es de tipo CADENA y el valor es hola.
-
-* La segunda fase es el PARSER. Su propósito es validar si la sintaxis de el programa es válida o no.
-  Por tanto, a esta fase se le conoce como análisis sintáctico. El PARSER toma la gramática formal
-  del lenguaje y trata de hacer un match con el texto del programa. En términos simples, la gramática
-  formal del lenguaje es el conjunto de reglas que se deben seguir para usar correctamente las
-  'palabras' definidas por el lenguaje. El PARSER valida si el programa que escribiste cumple las
-  reglas definidas en la gramática y si todo está bien produce una representación intermedia 
-  del programa conocida como AST o Abstract Syntax Tree.
 
   No olvides que un programa en lenguaje C se puede compilar a múltiples lenguajes ensambladores
   o set de instrucciones. Cada set de instrucciones es específico para cada CPU;
@@ -1246,54 +1011,136 @@ Un compilador también funciona por fases. Así:
   hace un momento. El generador toma el AST, lo optimiza y genera instrucciones en lenguaje ensamblador
   para la CPU específica que estemos compilando.
 
-Observa el siguiente código:
+Veamos el siguiente programa:
 
-.. code-block:: c
-   :linenos:
+.. code-block:: rust
 
-    int main(){
-        int a = 1;
-        int b = 2;
-        int c = a + b;
-        return 0;
+    fn main() {
+        let a = 1;
+        let b = -5;
+
+        let suma = sum(a, b);
+
+        println!("{} + {} = {}", a,b, suma);
     }
 
-Vamos a utilizar otro compilador, clang. Compila así:
+    fn sum(a: i32, b: i32) -> i32 {
+        a + b
+    }
 
-``clang -Xclang -ast-dump -fsyntax-only main.c``
+Podemos pedirle a ``rustc`` que nos muestre el resultado después de solo realizar el parsing
 
-observa el resultado. Esa será el AST generado.
+.. code-block:: bash
 
-Ejercicio 30
-^^^^^^^^^^^^^
+    rustc -Z unstable-options --pretty normal main.rs 
 
-En cuanto a la fase de ensamblado, ya te comenté que el archivo de salida contiene lenguaje de máquina
-de la CPU específica. Cada sistema operativo maneja su propio formato de archivo de salida del ensamblador
-o código objeto relocalizable (relocatable object file), es por ello que aunque el computador sea el mismo,
-si instalas diferentes sistemas operativos, cada uno tendrá su propio ensamblador y su propio formato
-de object file. Por tanto, un archivo de salida del ensamblador no solo contiene instrucciones específicas
-de la CPU, sino que también estará organizado según la conveniencia de cada sistema operativo.
-Y es por esto, entre otras cosas, que Windows no podrá ejecutar tal cual los programas compilados
-para Linux, así estés corriendo los sistemas operativos en el mismo computador.
+Este es el resultado
 
-Ejercicio 31
-^^^^^^^^^^^^^^
+.. image:: \../_static/unidad_1/compile_pretty_normal.png
 
-No te lo dije, pero cuando compilas un programa en C la única salida del programa no tiene que ser
-un ejecutable. Te cuento qué otras posibilidades tienes:
 
-* Puedes generar un ejecutable, usualmente con extensión ``.out`` equivalente al ``.exe`` de Windows.
-* Puedes generar una biblioteca estática con extensión ``.a`` equivalente a los archivos ``.lib``
-  de Windows.
-* Puedes generar una biblioteca dinámica con extensión ``.so`` equivalente a los ``.dll`` en Windows.
+Ejercicio 29: Macro Expansion
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Los object file de los que hablamos en el ejercicio anterior son el producto de la fase de ensamblado.
-Recuerda que se denominan relocatable object files. Para poder tener un ejecutable, recuerda que necesitas
-una fase más: el enlazado. La fase de enlazado te permite combinar varios relocatable object files y
-bibliotecas para generar ejecutables o bibliotecas.
+Cabe destacar que durante el proceso de **parsing** el parser puede encontrarse con macros e invocaciones, que deben ser expandidos
+y revelar más macros e invocaciones, y así... Por esto hay un paso más dedicado solo a expandir estos macros. Recuerda que los macros
+son como fragmentos de código que generan más código, por lo que es posible que al momento de expandir un macro se revele que este macro
+implementa otro macro.
 
-Ejercicio 32
-^^^^^^^^^^^^^^
+Esto puede convertirse en un problema bastante complicado porque puede ocurrir que el parser al momento de expandir un macro no sepa que es,
+porque aún no conoce la implementación de ese macro en específico, por esto implementa un sistema de **queue** que de una forma **muy** resumida
+y general es:
+
+- Sacar el macro de la cola
+- Intentar resolverlo
+- Si lo logra lo integra al Abstract Syntax Tree o **AST**.
+- Si no lo logra lo devuelve a la cola y sigue iterando sobre la cola.
+- Si no hace ningún progreso tenemos un error de compilación. (Por ejemplo un macro indefinido)
+
+Usando el mismo código del ejemplo vamos a pedirle a rustc que nos muestre el resultado después de expandir los macros:
+
+.. code-block:: bash
+
+    rustc -Z unstable-options --pretty normal main.rs 
+
+Este es el resultado
+
+.. image:: \../_static/unidad_1/compile_pretty_expanded.png
+    
+Presta especial atención a la expansión de ``println!()``, la implementación del macro
+nos ahorra escribir código como este, que es el código que en verdad es ejecutado cuando invocamos el macro, y lo simplifica en una simple expresión
+como ``println!()``. 
+
+Hagamos pequeño cambio al programa para ver cómo afecta el resultado, reemplaza el 
+``println!("{} + {} = {}", a,b, suma);`` por ``println!("El resultado es {}", suma);``
+y vuelve a invocar rustc para que muestre el resultado después de expandir los macros.
+
+- ¿Que cambios notaste en el resultado?
+
+Ejercicio 30: HIR
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+El **High-Level Intermediate Representation** o **HIR** es la `representación intermedia (IR) <https://en.wikipedia.org/wiki/Intermediate_representation>`__. más utilizada por rustc.
+Es una representación del **AST** y algunas partes de este son similares en sintaxis a Rust de cierta manera, debido a un paso
+conocido como **lowering**, muchas de las estructuras son eliminadas si no son relevantes para los análisis. Algunos ejemplos de esto son:
+
+- Eliminar parentesis.
+- Los ciclos ``for`` son convertidos en ``loop`` y ``match``.
+- ``if let`` son convertidos en ``match``
+
+Podemos ver el HIR de nuestro programa con
+
+.. code-block:: bash
+
+    rustc -Z unpretty=hir-tree main.rs
+
+
+En la creación de **HIR** se agregan varios identificadores a los nodos, como
+``DefId`` para referirse a la definición de un *crate*, ``LocalDefId`` para referirse a una
+*definición* dentro del crate actualmente compilado, o ``HirId`` para referirse a otro nodo del
+**HIR**. Estas definiciones permiten asociar diferentes elementos entre ellos, y organizar mejor los contenidos
+del *crate* que estamos compilando para que sean más fáciles de acceder, **solo se construye un HIR para el crate que se está compilando en ese momento**.
+
+Ejercicio 31: HIR MAP & HIR BODIES
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Una ventaja del **HIR** es que gracias a esta representación se puede iterar fácilmente sobre todos los *items* del crate con 
+pares de llaves y valores, sin la necesidad de iterar sobre todo el HIR.
+
+Por ejemplo, si se quiere convertir un ``defDefId``en ``NodeId`` se puede usar una función ``tcx.hir().as_local_node_id(def_id)`` para buscar
+un nodo con el id de la definición.
+
+Luego se podría buscar un Nodo para un ``NodeId`` con ``tcx.hir().find(n)`` y obtener informaciń de ese nodo e incluso un apuntador a la información
+o expresión que representa ese nodo.
+
+Un **Body** representa algún tipo de código ejecutable, como lo puede ser el cuerpo de una función o la definición de una constante.
+
+Mira el siguiente ejemplo:
+
+.. code-block:: rust
+
+    fn sum((x, y): (u32, u32)) -> u32 {
+        x + y
+    }
+
+Aquí el ``Body``asociado a ``sum()`` tendría:
+
+- un arreglo ``params`` que contiene el patrón de ``(x, y)``
+- un valor que contiene la **expresión** ``x + y``
+- un ``generator_kind`` que sería ``None``.
+
+Todos los bodies tienen un owner
+
+Ejercicio 32: MIR
+^^^^^^^^^^^^^^^^^^^^^^^
+
+A partir del **HIR** se puede construir el **MIR** (Mid-Level Intermediate Representation). Las características
+principales del MIR son:
+
+- Basado en un `Grafo de Control de Flujo<https://www.geeksforgeeks.org/software-engineering-control-flow-graph-cfg/>`__.
+- No tiene expresiones anidadas.
+- Todos los tipos en MIR son explícitos.
+
 
 ¿Qué necesitas para correr el archivo ejecutable en un sistema operativo? pues necesitas que el sistema
 operativo cree una abstracción denominada PROCESO. Por medio de esta abstracción el sistema operativo
