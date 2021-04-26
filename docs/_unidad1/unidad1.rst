@@ -926,7 +926,7 @@ Por Ejemplo:
 
 Imprime: 
 
-.. code-block:: rust
+.. code-block:: bash
 
     __________________________
     < Hello fellow Rustaceans! >
@@ -973,11 +973,11 @@ En los siguientes ejercicios vamos a ver detalladamente lo que significan los pa
 Ejercicio 28: Lexing and Parsing
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-El primer paso es `'Lexing and Parsing' <https://rustc-dev-guide.rust-lang.org/the-parser.html>`__. Esto es que el compilador
+El primer paso es `Lexing and Parsing <https://rustc-dev-guide.rust-lang.org/the-parser.html>`__, esto es que el compilador
 va a leer los caracteres unicode de nuestro progama y convertirlos en algo con lo que el compilador puede trabajar más cómodamente
 que si fueran solo Strings. Esto se hace en dos pasos:
 
-El `LEXER o ANÁLISIS LÉXICO <https://en.wikipedia.org/wiki/Lexical_analysis>`__. Su propósito es obtener una representación
+El `LEXER o ANÁLISIS LÉXICO <https://en.wikipedia.org/wiki/Lexical_analysis>`__, su propósito es obtener una representación
 intermedia del programa conocida como stream of tokens. Por ejemplo, supongamos la siguiente
 expresión en un lenguaje de programación arbitrario: ``print hola``. Un token es una unidad
 indivisible que consiste de un tipo y un valor. En la expresión anterior el primer token es de
@@ -985,16 +985,15 @@ tipo Identificador y el valor es print. El segundo token es de tipo CADENA y el 
 
 Otro ejemplo: ``a.b + c`` es convertido en el stream de tokens `a`,`.`,`b`,`+` y `c`.
 
-.. note:: `¿Alguien quiere porfavor pensar en la notación polaca inversa? <https://es.wikipedia.org/wiki/Notaci%C3%B3n_polaca_inversa>`__.
+.. note:: `¿Alguien quiere porfavor pensar en la notación polaca inversa? <https://es.wikipedia.org/wiki/Notaci%C3%B3n_polaca_inversa>`__
 
-El `PARSER <https://es.wikipedia.org/wiki/Analizador_sint%C3%A1ctico>`__. Su propósito es validar si la sintaxis de el programa es válida o no.
+El `PARSER <https://es.wikipedia.org/wiki/Analizador_sint%C3%A1ctico>`__, su propósito es validar si la sintaxis de el programa es válida o no.
 Por tanto, a esta fase se le conoce como análisis sintáctico. El PARSER toma la gramática formal
 del lenguaje y trata de hacer un match con el texto del programa. En términos simples, la gramática
 formal del lenguaje es el conjunto de reglas que se deben seguir para usar correctamente las
 'palabras' definidas por el lenguaje. El PARSER valida si el programa que escribiste cumple las
 reglas definidas en la gramática y si todo está bien produce una representación intermedia 
 del programa conocida como AST o Abstract Syntax Tree.
-
 
 Ahora que ya sabemos cómo se transforma un programa del código fuente al lenguaje de máquina,
 podemos indagar un poco más en las fases. ¿Cómo funciona un compilador?
@@ -1080,7 +1079,7 @@ y vuelve a invocar rustc para que muestre el resultado después de expandir los 
 Ejercicio 30: HIR
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-El **High-Level Intermediate Representation** o **HIR** es la `representación intermedia (IR) <https://en.wikipedia.org/wiki/Intermediate_representation>`__. más utilizada por rustc.
+El **High-Level Intermediate Representation** o **HIR** es la `representación intermedia (IR) <https://en.wikipedia.org/wiki/Intermediate_representation>`__ más utilizada por rustc.
 Es una representación del **AST** y algunas partes de este son similares en sintaxis a Rust de cierta manera, debido a un paso
 conocido como **lowering**, muchas de las estructuras son eliminadas si no son relevantes para los análisis. Algunos ejemplos de esto son:
 
@@ -1137,10 +1136,393 @@ Ejercicio 32: MIR
 A partir del **HIR** se puede construir el **MIR** (Mid-Level Intermediate Representation). Las características
 principales del MIR son:
 
-- Basado en un `Grafo de Control de Flujo<https://www.geeksforgeeks.org/software-engineering-control-flow-graph-cfg/>`__.
+- Basado en un `Grafo de Control de Flujo <https://www.geeksforgeeks.org/software-engineering-control-flow-graph-cfg/>`__.
 - No tiene expresiones anidadas.
 - Todos los tipos en MIR son explícitos.
 
+Viendo el MIR de un programa podremos comprender mejor la estructura de este, podemos generar un .mir del programa que hemos
+usado en los últimos ejemplos con el comando:
+
+.. code-block:: bash
+
+    rustc --emit mir main.rs
+
+El resultado es:
+
+.. code-block:: bash
+
+    // WARNING: This output format is intended for human consumers only
+    // and is subject to change without notice. Knock yourself out.
+    fn sum(_1: i32, _2: i32) -> i32 {
+        debug a => _1;                       // in scope 0 at main.rs:10:8: 10:9
+        debug b => _2;                       // in scope 0 at main.rs:10:16: 10:17
+        let mut _0: i32;                     // return place in scope 0 at main.rs:10:27: 10:30
+        let mut _3: i32;                     // in scope 0 at main.rs:11:5: 11:6
+        let mut _4: i32;                     // in scope 0 at main.rs:11:9: 11:10
+        let mut _5: (i32, bool);             // in scope 0 at main.rs:11:5: 11:10
+
+        bb0: {
+            _3 = _1;                         // scope 0 at main.rs:11:5: 11:6
+            _4 = _2;                         // scope 0 at main.rs:11:9: 11:10
+            _5 = CheckedAdd(_3, _4);         // scope 0 at main.rs:11:5: 11:10
+            assert(!move (_5.1: bool), "attempt to compute `{} + {}`, which would overflow", move _3, move _4) -> bb1; // scope 0 at main.rs:11:5: 11:10
+        }
+
+        bb1: {
+            _0 = move (_5.0: i32);           // scope 0 at main.rs:11:5: 11:10
+            return;                          // scope 0 at main.rs:12:2: 12:2
+        }
+    }
+
+    fn main() -> () {
+        let mut _0: ();                      // return place in scope 0 at main.rs:1:11: 1:11
+        let _1: i32;                         // in scope 0 at main.rs:2:9: 2:10
+        let mut _4: i32;                     // in scope 0 at main.rs:5:20: 5:21
+        let mut _5: i32;                     // in scope 0 at main.rs:5:23: 5:24
+        let _6: ();                          // in scope 0 at /rustc/42816d61ead7e46d462df997958ccfd514f8c21c/library/std/src/macros.rs:97:9: 97:62
+        let mut _7: std::fmt::Arguments;     // in scope 0 at /rustc/42816d61ead7e46d462df997958ccfd514f8c21c/library/std/src/macros.rs:97:28: 97:61
+        let mut _8: &[&str];                 // in scope 0 at main.rs:7:14: 7:34
+        let mut _9: &[&str; 2];              // in scope 0 at main.rs:7:14: 7:34
+        let _10: &[&str; 2];                 // in scope 0 at main.rs:7:14: 7:34
+        let mut _11: &[std::fmt::ArgumentV1]; // in scope 0 at /rustc/42816d61ead7e46d462df997958ccfd514f8c21c/library/std/src/macros.rs:97:28: 97:61
+        let mut _12: &[std::fmt::ArgumentV1; 1]; // in scope 0 at /rustc/42816d61ead7e46d462df997958ccfd514f8c21c/library/std/src/macros.rs:97:28: 97:61
+        let _13: &[std::fmt::ArgumentV1; 1]; // in scope 0 at /rustc/42816d61ead7e46d462df997958ccfd514f8c21c/library/std/src/macros.rs:97:28: 97:61
+        let _14: [std::fmt::ArgumentV1; 1];  // in scope 0 at /rustc/42816d61ead7e46d462df997958ccfd514f8c21c/library/std/src/macros.rs:97:28: 97:61
+        let mut _15: (&i32,);                // in scope 0 at /rustc/42816d61ead7e46d462df997958ccfd514f8c21c/library/std/src/macros.rs:97:28: 97:61
+        let mut _16: &i32;                   // in scope 0 at main.rs:7:36: 7:40
+        let mut _18: std::fmt::ArgumentV1;   // in scope 0 at /rustc/42816d61ead7e46d462df997958ccfd514f8c21c/library/std/src/macros.rs:97:28: 97:61
+        let mut _19: &i32;                   // in scope 0 at main.rs:7:36: 7:40
+        let mut _20: for<'r, 's, 't0> fn(&'r i32, &'s mut std::fmt::Formatter<'t0>) -> std::result::Result<(), std::fmt::Error>; // in scope 0 at main.rs:7:36: 7:40
+        scope 1 {
+            debug a => _1;                   // in scope 1 at main.rs:2:9: 2:10
+            let _2: i32;                     // in scope 1 at main.rs:3:9: 3:10
+            scope 2 {
+                debug b => _2;               // in scope 2 at main.rs:3:9: 3:10
+                let _3: i32;                 // in scope 2 at main.rs:5:9: 5:13
+                scope 3 {
+                    debug suma => _3;        // in scope 3 at main.rs:5:9: 5:13
+                    let _17: &i32;           // in scope 3 at main.rs:7:36: 7:40
+                    let mut _21: &[&str; 2]; // in scope 3 at main.rs:7:14: 7:34
+                    scope 4 {
+                        debug arg0 => _17;   // in scope 4 at main.rs:7:36: 7:40
+                    }
+                }
+            }
+        }
+
+        bb0: {
+            _1 = const 1_i32;                // scope 0 at main.rs:2:13: 2:14
+            _2 = const -5_i32;               // scope 1 at main.rs:3:13: 3:15
+            _4 = const 1_i32;                // scope 2 at main.rs:5:20: 5:21
+            _5 = const -5_i32;               // scope 2 at main.rs:5:23: 5:24
+            _3 = sum(move _4, move _5) -> bb1; // scope 2 at main.rs:5:16: 5:25
+                                             // mir::Constant
+                                             // + span: main.rs:5:16: 5:19
+                                             // + literal: Const { ty: fn(i32, i32) -> i32 {sum}, val: Value(Scalar(<ZST>)) }
+        }
+
+        bb1: {
+            _21 = const main::promoted[0];   // scope 3 at main.rs:7:14: 7:34
+                                             // ty::Const
+                                             // + ty: &[&str; 2]
+                                             // + val: Unevaluated(main, [], Some(promoted[0]))
+                                             // mir::Constant
+                                             // + span: main.rs:7:14: 7:34
+                                             // + literal: Const { ty: &[&str; 2], val: Unevaluated(Unevaluated { def: WithOptConstParam { did: DefId(0:3 ~ main[317d]::main), const_param_did: None }, substs: [], promoted: Some(promoted[0]) }) }
+            _10 = _21;                       // scope 3 at main.rs:7:14: 7:34
+            _9 = _10;                        // scope 3 at main.rs:7:14: 7:34
+            _8 = move _9 as &[&str] (Pointer(Unsize)); // scope 3 at main.rs:7:14: 7:34
+            _16 = &_3;                       // scope 3 at main.rs:7:36: 7:40
+            (_15.0: &i32) = move _16;        // scope 3 at /rustc/42816d61ead7e46d462df997958ccfd514f8c21c/library/std/src/macros.rs:97:28: 97:61
+            _17 = (_15.0: &i32);             // scope 3 at main.rs:7:36: 7:40
+            _19 = _17;                       // scope 4 at main.rs:7:36: 7:40
+            _20 = <i32 as std::fmt::Display>::fmt as for<'r, 's, 't0> fn(&'r i32, &'s mut std::fmt::Formatter<'t0>) -> std::result::Result<(), std::fmt::Error> (Pointer(ReifyFnPointer)); // scope 4 at main.rs:7:36: 7:40
+                                             // mir::Constant
+                                             // + span: main.rs:7:36: 7:40
+                                             // + literal: Const { ty: for<'r, 's, 't0> fn(&'r i32, &'s mut std::fmt::Formatter<'t0>) -> std::result::Result<(), std::fmt::Error> {<i32 as std::fmt::Display>::fmt}, val: Value(Scalar(<ZST>)) }
+            _18 = ArgumentV1::new::<i32>(move _19, move _20) -> bb2; // scope 4 at /rustc/42816d61ead7e46d462df997958ccfd514f8c21c/library/std/src/macros.rs:97:28: 97:61
+                                             // mir::Constant
+                                             // + span: /rustc/42816d61ead7e46d462df997958ccfd514f8c21c/library/std/src/macros.rs:97:28: 97:61
+                                             // + user_ty: UserType(1)
+                                             // + literal: Const { ty: for<'b> fn(&'b i32, for<'r, 's, 't0> fn(&'r i32, &'s mut std::fmt::Formatter<'t0>) -> std::result::Result<(), std::fmt::Error>) -> std::fmt::ArgumentV1<'b> {std::fmt::ArgumentV1::new::<i32>}, val: Value(Scalar(<ZST>)) }
+        }
+
+        bb2: {
+            _14 = [move _18];                // scope 4 at /rustc/42816d61ead7e46d462df997958ccfd514f8c21c/library/std/src/macros.rs:97:28: 97:61
+            _13 = &_14;                      // scope 3 at /rustc/42816d61ead7e46d462df997958ccfd514f8c21c/library/std/src/macros.rs:97:28: 97:61
+            _12 = _13;                       // scope 3 at /rustc/42816d61ead7e46d462df997958ccfd514f8c21c/library/std/src/macros.rs:97:28: 97:61
+            _11 = move _12 as &[std::fmt::ArgumentV1] (Pointer(Unsize)); // scope 3 at /rustc/42816d61ead7e46d462df997958ccfd514f8c21c/library/std/src/macros.rs:97:28: 97:61
+            _7 = Arguments::new_v1(move _8, move _11) -> bb3; // scope 3 at /rustc/42816d61ead7e46d462df997958ccfd514f8c21c/library/std/src/macros.rs:97:28: 97:61
+                                             // mir::Constant
+                                             // + span: /rustc/42816d61ead7e46d462df997958ccfd514f8c21c/library/std/src/macros.rs:97:28: 97:61
+                                             // + user_ty: UserType(0)
+                                             // + literal: Const { ty: fn(&[&'static str], &[std::fmt::ArgumentV1]) -> std::fmt::Arguments {std::fmt::Arguments::new_v1}, val: Value(Scalar(<ZST>)) }
+        }
+
+        bb3: {
+            _6 = _print(move _7) -> bb4;     // scope 3 at /rustc/42816d61ead7e46d462df997958ccfd514f8c21c/library/std/src/macros.rs:97:9: 97:62
+                                             // mir::Constant
+                                             // + span: /rustc/42816d61ead7e46d462df997958ccfd514f8c21c/library/std/src/macros.rs:97:9: 97:27
+                                             // + literal: Const { ty: for<'r> fn(std::fmt::Arguments<'r>) {std::io::_print}, val: Value(Scalar(<ZST>)) }
+        }
+
+        bb4: {
+            _0 = const ();                   // scope 0 at main.rs:1:11: 8:2
+            return;                          // scope 0 at main.rs:8:2: 8:2
+        }
+    }
+
+    promoted[0] in main: &[&str; 2] = {
+        let mut _0: &[&str; 2];              // return place in scope 0 at main.rs:7:14: 7:34
+        let mut _1: [&str; 2];               // in scope 0 at main.rs:7:14: 7:34
+
+        bb0: {
+            _1 = [const "El resultado es ", const "\n"]; // scope 0 at main.rs:7:14: 7:34
+                                             // ty::Const
+                                             // + ty: &str
+                                             // + val: Value(Slice { data: Allocation { bytes: [69, 108, 32, 114, 101, 115, 117, 108, 116, 97, 100, 111, 32, 101, 115, 32], relocations: Relocations(SortedMap { data: [] }), init_mask: InitMask { blocks: [65535], len: Size { raw: 16 } }, size: Size { raw: 16 }, align: Align { pow2: 0 }, mutability: Not, extra: () }, start: 0, end: 16 })
+                                             // mir::Constant
+                                             // + span: main.rs:7:14: 7:34
+                                             // + literal: Const { ty: &str, val: Value(Slice { data: Allocation { bytes: [69, 108, 32, 114, 101, 115, 117, 108, 116, 97, 100, 111, 32, 101, 115, 32], relocations: Relocations(SortedMap { data: [] }), init_mask: InitMask { blocks: [65535], len: Size { raw: 16 } }, size: Size { raw: 16 }, align: Align { pow2: 0 }, mutability: Not, extra: () }, start: 0, end: 16 }) }
+                                             // ty::Const
+                                             // + ty: &str
+                                             // + val: Value(Slice { data: Allocation { bytes: [10], relocations: Relocations(SortedMap { data: [] }), init_mask: InitMask { blocks: [1], len: Size { raw: 1 } }, size: Size { raw: 1 }, align: Align { pow2: 0 }, mutability: Not, extra: () }, start: 0, end: 1 })
+                                             // mir::Constant
+                                             // + span: main.rs:7:14: 7:34
+                                             // + literal: Const { ty: &str, val: Value(Slice { data: Allocation { bytes: [10], relocations: Relocations(SortedMap { data: [] }), init_mask: InitMask { blocks: [1], len: Size { raw: 1 } }, size: Size { raw: 1 }, align: Align { pow2: 0 }, mutability: Not, extra: () }, start: 0, end: 1 }) }
+            _0 = &_1;                        // scope 0 at main.rs:7:14: 7:34
+            return;                          // scope 0 at main.rs:7:14: 7:34
+        }
+    }
+
+Si lo analizamos un poco en detalle podremos identificar que al comienzo de la función ``sum`` la declaración de varias variables:
+
+.. code-block:: bash
+
+        debug a => _1;                       // in scope 0 at main.rs:10:8: 10:9
+        debug b => _2;                       // in scope 0 at main.rs:10:16: 10:17
+        let mut _0: i32;                     // return place in scope 0 at main.rs:10:27: 10:30
+        let mut _3: i32;                     // in scope 0 at main.rs:11:5: 11:6
+        let mut _4: i32;                     // in scope 0 at main.rs:11:9: 11:10
+        let mut _5: (i32, bool);             // in scope 0 at main.rs:11:5: 11:10
+
+Nota que en el MIR las variables no tienen nombres, pero si tienen índices, como ``_0`` o ``_3``, y podemos diferenciar
+variables definidas por nosotros porque tienen asociadas variables **debuginfo**.
+
+Si seguimos analizando la función podremos encontrar los **basic blocks**, son unidades del grafo control de flujo,
+consisten de:
+
+- **statements**: acciones con un sucesor.
+- **terminators**: acciones con múltiples posibles sucesores, siempre al final del bloque
+
+.. code-block:: bash
+
+    bb0: {
+            _3 = _1;                         // scope 0 at main.rs:11:5: 11:6
+            _4 = _2;                         // scope 0 at main.rs:11:9: 11:10
+            _5 = CheckedAdd(_3, _4);         // scope 0 at main.rs:11:5: 11:10
+            assert(!move (_5.1: bool), "attempt to compute `{} + {}`, which would overflow", move _3, move _4) -> bb1; // scope 0 at main.rs:11:5: 11:10
+        }
+    
+    bb1: {
+            _0 = move (_5.0: i32);           // scope 0 at main.rs:11:5: 11:10
+            return;                          // scope 0 at main.rs:12:2: 12:2
+    }
+
+En los bloques podemos ver varias asignaciones y statements.
+
+.. code-block:: bash
+
+    _3 = _1;
+    _4 = _2;
+    _5 = CheckedAdd(_3, _4);         // scope 0 at main.rs:11:5: 11:10
+
+    ____________________________________
+    
+    _0 = move (_5.0: i32);           // scope 0 at main.rs:11:5: 11:10
+    return;                          // scope 0 at main.rs:12:2: 12:2
+
+
+Las asignaciones generalmente tienen la forma:
+
+.. code-block:: bash
+
+    <Place> = <Rvalue>
+
+Un *Place* es una expresión como ``_3``, ``_3.f`` o ``*_3``- Denotando una ubicación en memoria. Un **Rvalue** es una expresión
+que crea un valor, el rvalue es una expresión de referencia mutable parecida a ``&mut <Place>``. De esta manera podemos definir
+una gramática para rvalues como:
+
+.. code-block:: bash
+
+    <Rvalue>  = & (mut)? <Place>
+              | <Operand> + <Operand>
+              | <Operand> - <Operand>
+              | ...
+
+    <Operand> = Constant
+              | copy Place
+              | move Place
+
+- Intenta identificar algunas de estas estructuras y bloques para la función ``main``.
+
+
+Ejercicio 33: Análisis
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+En este punto el compilador hace un análisis del código, esta parte es conocida como "El sistema de tipos de Rust", durante todo
+el proceso de compilación se hacen varios análisis en diferentes etapas, no todos los análisis no ocurren en un solo momento o una etapa, 
+sino que están repartidos entre varias etapas del proceso. Por ejemplo el *type checking* ocurre en el HIR mientras que el *borrow checking* ocurre en el MIR.
+
+Los análisis son:
+
+- Type Representation.
+- Type Inference. 
+- Typechecking.
+- Pattern and Exhaustiveness Checking.
+- MIR dataflow.
+- Borrow Checking
+- Parameter Environments
+  
+De cierta forma están orientados a analizar el programa pensando en *lo que podría ser* en lugar de lo que ya es, de esta forma puede identificar
+casos en los que *podría* ocurrir un error. Puedes profundizar en este tema leyendo sobre `Static program Analysis <https://en.wikipedia.org/wiki/Static_program_analysis>`_.
+
+
+Ejercicio 34: LLVM
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Después de que el compilador termina con todos los pasos vistos en elos ejercicios anteriores, finalmente tendremos nada que que la máquina entienda.
+¡¡Hasta el momento no hemos generado ni una sola línea de código ejecutable!!. Pero estamos cerca, en este punto al compilador solo le falta hacer
+optimizaciones finales, como sustituir tipos, simplificar referencias, analizar constantes y estará listo para pasar a la etapa de generar código.
+
+Para generar el código ejecutable Rust utiliza `LLVM <https://llvm.org/>`__. "Es una infraestructura para desarrollar compiladores, 
+escrita a su vez en el lenguaje de programación C++, que está diseñada para optimizar el tiempo de compilación, el tiempo de enlazado, 
+el tiempo de ejecución y el "tiempo ocioso" en cualquier lenguaje de programación que el usuario quiera definir. "
+
+Al final de las optimizaciones mencionadas anteriormente, cada bloque básico del MIR es *mapeado* a un bloque básico de LLVM, generando un LLVM IR,
+que es básicamente código de ensamblador con unos tipos y anotaciones adicionales que facilitan hacer optimizaciones.
+
+Luego ya hacia las etapas finales del proceso de compilación, LLVM toma como input el LLVM IR, lo agrupa en módulos para la generación de código y hace 
+el *linking*, en esta etapa puede que haga *más* optimizaciones para generar finalmente un ejecutable.
+
+¿En donde quedó la parte en que el compilador de rust genera código?
+
+Rust no implementa la parte de generación de código por si mismo, sino que se vale de LLVM, esto tiene varias ventajas como:
+
+- No hay que escribir un compilador entero.
+- Se puede aprovechar una gran cantidad de herramientas que ofrece el proyecto de LLVM.
+- Se puede compilar Rust a cualquiera de las plataformas para las que LLVM tiene soporte.
+- Los avances de los proyectos que usan LLVM benefician a todos. Por ejemplo cuando se descubrieron las vulnerabilidades de `Spectre y Meltdown <https://meltdownattack.com/>`__ solo fue necesario hacer un parche para LLVM para solucionarlo.
+
+Podemos ver el código LLVM generado con los flags ``--emit llvm-ir``, entonces:
+
+.. code-block:: bash
+
+    rustc --emit llvm-ir main.rs
+
+Produce:
+
+.. code-block:: bash
+
+    ; ModuleID = 'main.7rcbfp3g-cgu.0'
+    source_filename = "main.7rcbfp3g-cgu.0"
+    target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
+    target triple = "x86_64-unknown-linux-gnu"
+
+    %"std::fmt::Formatter" = type { [0 x i64], { i64, i64 }, [0 x i64], { i64, i64 }, [0 x i64], { {}*, [3 x i64]* }, [0 x i32], i32, [0 x i32], i32, [0 x i8], i8, [7 x i8] }
+    %"core::fmt::Opaque" = type {}
+    %"std::fmt::Arguments" = type { [0 x i64], { [0 x { [0 x i8]*, i64 }]*, i64 }, [0 x i64], { i64*, i64 }, [0 x i64], { [0 x { i8*, i64* }]*, i64 }, [0 x i64] }
+    %"std::panic::Location" = type { [0 x i64], { [0 x i8]*, i64 }, [0 x i32], i32, [0 x i32], i32, [0 x i32] }
+    %"unwind::libunwind::_Unwind_Exception" = type { [0 x i64], i64, [0 x i64], void (i32, %"unwind::libunwind::_Unwind_Exception"*)*, [0 x i64], [6 x i64], [0 x i64] }
+    %"unwind::libunwind::_Unwind_Context" = type { [0 x i8] }
+
+    @vtable.0 = private unnamed_addr constant { void (i64**)*, i64, i64, i32 (i64**)*, i32 (i64**)*, i32 (i64**)* } { void (i64**)* @"_ZN4core3ptr85drop_in_place$LT$std..rt..lang_start$LT$$LP$$RP$$GT$..$u7b$$u7b$closure$u7d$$u7d$$GT$17he9c53e06c5d4b711E", i64 8, i64 8, i32 (i64**)* @"_ZN3std2rt10lang_start28_$u7b$$u7b$closure$u7d$$u7d$17hce1a25dfefc4f916E", i32 (i64**)* @"_ZN3std2rt10lang_start28_$u7b$$u7b$closure$u7d$$u7d$17hce1a25dfefc4f916E", i32 (i64**)* @"_ZN4core3ops8function6FnOnce40call_once$u7b$$u7b$vtable.shim$u7d$$u7d$17h427fda46e047ab3fE" }, align 8
+    @alloc1 = private unnamed_addr constant <{ [16 x i8] }> <{ [16 x i8] c"El resultado es " }>, align 1
+    @alloc3 = private unnamed_addr constant <{ [1 x i8] }> <{ [1 x i8] c"\0A" }>, align 1
+    @alloc2 = private unnamed_addr constant <{ i8*, [8 x i8], i8*, [8 x i8] }> <{ i8* getelementptr inbounds (<{ [16 x i8] }>, <{ [16 x i8] }>* @alloc1, i32 0, i32 0, i32 0), [8 x i8] c"\10\00\00\00\00\00\00\00", i8* getelementptr inbounds (<{ [1 x i8] }>, <{ [1 x i8] }>* @alloc3, i32 0, i32 0, i32 0), [8 x i8] c"\01\00\00\00\00\00\00\00" }>, align 8
+    @alloc29 = private unnamed_addr constant <{ [7 x i8] }> <{ [7 x i8] c"main.rs" }>, align 1
+    @alloc30 = private unnamed_addr constant <{ i8*, [16 x i8] }> <{ i8* getelementptr inbounds (<{ [7 x i8] }>, <{ [7 x i8] }>* @alloc29, i32 0, i32 0, i32 0), [16 x i8] c"\07\00\00\00\00\00\00\00\0B\00\00\00\05\00\00\00" }>, align 8
+    @str.1 = internal constant [28 x i8] c"attempt to add with overflow"
+
+    ; std::sys_common::backtrace::__rust_begin_short_backtrace
+    ; Function Attrs: noinline nonlazybind uwtable
+    define internal void @_ZN3std10sys_common9backtrace28__rust_begin_short_backtrace17hf66d8c7a932d6f71E(void ()* nonnull %f) unnamed_addr #0 personality i32 (i32, i32, i64, %"unwind::libunwind::_Unwind_Exception"*, %"unwind::libunwind::_Unwind_Context"*)* @rust_eh_personality {
+    start:
+      %0 = alloca { i8*, i32 }, align 8
+    ; call core::ops::function::FnOnce::call_once
+      call void @_ZN4core3ops8function6FnOnce9call_once17hfa3234c194bf7715E(void ()* nonnull %f)
+      br label %bb1
+
+    bb1:                                              ; preds = %start
+    ; invoke core::hint::black_box
+      invoke void @_ZN4core4hint9black_box17hd3ed79ea75a8b07eE()
+              to label %bb2 unwind label %cleanup
+
+    bb2:                                              ; preds = %bb1
+      ret void
+
+    bb3:                                              ; preds = %cleanup
+      br label %bb4
+
+    bb4:                                              ; preds = %bb3
+      %1 = bitcast { i8*, i32 }* %0 to i8**
+      %2 = load i8*, i8** %1, align 8
+      %3 = getelementptr inbounds { i8*, i32 }, { i8*, i32 }* %0, i32 0, i32 1
+      %4 = load i32, i32* %3, align 8
+      %5 = insertvalue { i8*, i32 } undef, i8* %2, 0
+      %6 = insertvalue { i8*, i32 } %5, i32 %4, 1
+      resume { i8*, i32 } %6
+
+    cleanup:                                          ; preds = %bb1
+      %7 = landingpad { i8*, i32 }
+              cleanup
+      %8 = extractvalue { i8*, i32 } %7, 0
+      %9 = extractvalue { i8*, i32 } %7, 1
+      %10 = getelementptr inbounds { i8*, i32 }, { i8*, i32 }* %0, i32 0, i32 0
+      store i8* %8, i8** %10, align 8
+      %11 = getelementptr inbounds { i8*, i32 }, { i8*, i32 }* %0, i32 0, i32 1
+      store i32 %9, i32* %11, align 8
+      br label %bb3
+    }
+
+    ; std::rt::lang_start
+    ; Function Attrs: nonlazybind uwtable
+    define hidden i64 @_ZN3std2rt10lang_start17h358cf2a9c1254586E(void ()* nonnull %main, i64 %argc, i8** %argv) unnamed_addr #1 {
+    start:
+      %_7 = alloca i64*, align 8
+      %0 = bitcast i64** %_7 to void ()**
+      store void ()* %main, void ()** %0, align 8
+      %_4.0 = bitcast i64** %_7 to {}*
+    ; call std::rt::lang_start_internal
+      %1 = call i64 @_ZN3std2rt19lang_start_internal17hab5a8a909af4f90eE({}* nonnull align 1 %_4.0, [3 x i64]* align 8 dereferenceable(24) bitcast ({ void (i64**)*, i64, i64, i32 (i64**)*, i32 (i64**)*, i32 (i64**)* }* @vtable.0 to [3 x i64]*), i64 %argc, i8** %argv)
+      br label %bb1
+
+    bb1:                                              ; preds = %start
+      ret i64 %1
+    }
+
+    ; std::rt::lang_start::{{closure}}
+    ; Function Attrs: inlinehint nonlazybind uwtable
+    define internal i32 @"_ZN3std2rt10lang_start28_$u7b$$u7b$closure$u7d$$u7d$17hce1a25dfefc4f916E"(i64** align 8 dereferenceable(8) %_1) unnamed_addr #2 {
+    start:
+      %0 = bitcast i64** %_1 to void ()**
+      %_3 = load void ()*, void ()** %0, align 8, !nonnull !3
+    ; call std::sys_common::backtrace::__rust_begin_short_backtrace
+      call void @_ZN3std10sys_common9backtrace28__rust_begin_short_backtrace17hf66d8c7a932d6f71E(void ()* nonnull %_3)
+      br label %bb1
+
+    bb1:                                              ; preds = %start
+    ; call <() as std::process::Termination>::report
+      %1 = call i32 @"_ZN54_$LT$$LP$$RP$$u20$as$u20$std..process..Termination$GT$6report17h748f98991ea520fbE"()
+      br label %bb2
+
+    bb2:                                              ; preds = %bb1
+      ret i32 %1
+    }
+
+    ...
+
+|||||| WIP
 
 ¿Qué necesitas para correr el archivo ejecutable en un sistema operativo? pues necesitas que el sistema
 operativo cree una abstracción denominada PROCESO. Por medio de esta abstracción el sistema operativo
@@ -1155,17 +1537,13 @@ parte del ejecutable; sin embargo, el archivo ejecutable si tendrá que indicar 
 bibliotecas dinámicas tiene. De esta manera cuando quieras ejecutar el archivo, el sistema operativo tendrá
 que cargar EN TIEMPO DE EJECUCIÓN el código de la biblioteca necesaria.
 
-Ejercicio 33
-^^^^^^^^^^^^^^
+||||||| WIP
 
 ¿Qué es un biblioteca estática? es un archivo contenedor de múltiples relocatable object files. Este
 archivo no es producido por el enlazador. En sistemas como Linux será el programa ``ar`` quien
 lo generará. Como las bibliotecas estáticas son colecciones de relocatable object files, estas
 pueden ser enlazadas con otros object files para producir ejecutables. De esta manera, la biblioteca
 estática HARÁ PARTE DEL EJECUTABLE.
-
-Ejercicio 34
-^^^^^^^^^^^^^^
 
 ¿Y qué es una biblioteca dinámica? es un archivo creado directamente por el enlazador. Es 
 similar en estructura a los archivos ejecutables, pero NO LO PUEDES EJECUTAR directamente. Una
