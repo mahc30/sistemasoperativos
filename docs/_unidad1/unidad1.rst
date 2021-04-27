@@ -1522,12 +1522,14 @@ Produce:
 
     ...
 
-|||||| WIP
+
+Ejercicio 35
+^^^^^^^^^^^^^^
 
 ¿Qué necesitas para correr el archivo ejecutable en un sistema operativo? pues necesitas que el sistema
 operativo cree una abstracción denominada PROCESO. Por medio de esta abstracción el sistema operativo
 administrará cuándo se ejecutarán, por parte de alguno de los CORE disponibles, el flujo de instrucciones
-definido en el archivo ejecutable. Como te has podido dar cuenta, la ejecución de un programa en C comienza
+definido en el archivo ejecutable. Como te has podido dar cuenta, la ejecución de un programa en Rust comienza
 llamando la función ``main``; sin embargo, el punto de entrada de un archivo ejecutable no es la función
 ``main``, sino otro punto que tendrá definidas las instrucciones necesarias para preparar el llamado a main.
 
@@ -1555,80 +1557,1059 @@ de una biblioteca estática, las bibliotecas dinámicas no hacen parte del archi
 de un programa, sino que son cargadas en la memoria del computador en tiempo de ejecución y
 son compartidas por múltiples procesos. ¡QUE BELLEZA!
 
-Ejercicio 35
-^^^^^^^^^^^^^^
-
 ¿Y cómo funciona un enlazador? ya sabes que un enlazador toma varios relocatable object files
 y los combina para generar un ejecutable. ¿Cómo los combina? Para responder esta pregunta
 debemos indagar al interior de un relocatable object file. Ya sabes que estos archivos tienen
 instrucciones de máquina, pero organizadas en secciones denominadas SÍMBOLOS. Para entender mejor
 hagamos un ejemplo. Escribe los siguientes códigos:
 
-
-functions.c:
-
-.. code-block:: c
+.. code-block:: rust
    :linenos:
 
-    int suma(int a, int b) {
-        return (a + b);
+    fn suma(a: i32, b: i32) -> i32 {
+       a + b
     }
 
-    int sumatoria(int* numeros, int cantidad) {
-        int acumulado = 0;
-        for (int i = 0; i < cantidad; i++) {
-            acumulado += numeros[i];
-        }
-        return acumulado;
+    fn sumatoria(numeros: &mut [i32], cantidad: i32) -> i32 {
+       let mut acumulado : i32 = 0;
+    
+       for i in 0..numeros.len(){
+           acumulado = acumulado + numeros[i];
+       }
+
+       return acumulado
     }
 
-Compila el archivo anterior para producir un relocatable object file:
+    fn main(){
 
-``gcc -Wall -c functions.c -o functions.o``
+    }
 
-Ahora observa los símbolos definidos en functions.o utilizando el siguiente comando:
+Compila el archivo anterior para producir una librería dinámica, generará un archivo llamado **libsum.so** en la misma carpeta:
 
-``nm functions.o``
+``rustc --crate-type=cdylib sum.rs``
+
+Ahora observa los símbolos definidos en libsum.rlib utilizando el siguiente comando:
+
+``nm libsum.so``
 
 El resultado será:
 
-.. code-block:: c
+.. code-block:: bash
 
-    0000000000000000 T suma
-    0000000000000018 T sumatoria
+    0000000000004008 b completed.8060
+    w __cxa_finalize@@GLIBC_2.2.5
+    0000000000001040 t deregister_tm_clones
+    00000000000010b0 t __do_global_dtors_aux
+    0000000000003d28 d __do_global_dtors_aux_fini_array_entry
+    0000000000004000 d __dso_handle
+    0000000000003d90 d _DYNAMIC
+    00000000000015f4 t _fini
+    00000000000010f0 t frame_dummy
+    0000000000003d20 d __frame_dummy_init_array_entry
+    000000000000222c r __FRAME_END__
+    0000000000003f80 d _GLOBAL_OFFSET_TABLE_
+    w __gmon_start__
+    0000000000002058 r __GNU_EH_FRAME_HDR
+    0000000000001000 t _init
+    w _ITM_deregisterTMCloneTable
+    w _ITM_registerTMCloneTable
+    U pthread_mutex_lock@@GLIBC_2.2.5
+    U pthread_mutex_unlock@@GLIBC_2.2.5
+    0000000000001070 t register_tm_clones
+    0000000000001310 T rust_eh_personality
+    0000000000004008 d __TMC_END__
+    U _Unwind_GetDataRelBase@@GCC_3.0
+    U _Unwind_GetIPInfo@@GCC_4.2.0
+    U _Unwind_GetLanguageSpecificData@@GCC_3.0
+    U _Unwind_GetRegionStart@@GCC_3.0
+    U _Unwind_GetTextRelBase@@GCC_3.0
+    U _Unwind_SetGR@@GCC_3.0
+    U _Unwind_SetIP@@GCC_3.0
+    0000000000001170 t _ZN12panic_unwind5dwarf2eh20read_encoded_pointer17hbec45f6509d5d74aE
+    00000000000012f0 t _ZN12panic_unwind8real_imp14find_eh_action28_$u7b$$u7b$closure$u7d$$u7d$17hdd2451d83f6b6178E
+    0000000000001300 t _ZN12panic_unwind8real_imp14find_eh_action28_$u7b$$u7b$closure$u7d$$u7d$17heeb8101b14e5ebf6E
+    0000000000001100 t _ZN3std3sys4unix4args3imp15ARGV_INIT_ARRAY12init_wrapper17h9bae8a0cafc2b6ccE
+    0000000000003d18 d _ZN3std3sys4unix4args3imp15ARGV_INIT_ARRAY17h5b809bb581f98cb0E
+    0000000000004010 b _ZN3std3sys4unix4args3imp4ARGC17h393a33c6be9e9b3bE
+    0000000000004018 b _ZN3std3sys4unix4args3imp4ARGV17h5274ca72b78295baE
+    0000000000004020 b _ZN3std3sys4unix4args3imp4LOCK17h600045dca3348f0eE
+    0000000000001140 t _ZN4core3ops8function6FnOnce40call_once$u7b$$u7b$vtable.shim$u7d$$u7d$17h0318dffd3a9d1c14E
+    0000000000001150 t _ZN4core3ops8function6FnOnce40call_once$u7b$$u7b$vtable.shim$u7d$$u7d$17h3dfb55efa1414d46E
+    0000000000001160 t _ZN4core3ptr88drop_in_place$LT$panic_unwind..real_imp..find_eh_action..$u7b$$u7b$closure$u7d$$u7d$$GT$17haf97ab3c90a49e7cE
 
-Nota que los dos símbolos encontrados son precisamente los nombres de las funciones
-definidas en ``functions.c``. Ahora ejecuta el siguiente comando que te dará más detalles
-acerca de los símbolos en ``functions.o``:
 
-``readelf -s functions.o``
+En el archivo generado encontramos una gran cantidad de símbolos, no podemos identificarlos, esto es porque
+el compilador de rust no solo ha compilado nuestro código sino que ha agregado algunas cosas resultado
+de los análisis y optimizaciones que vimos en los ejercicios anteriores. Las funciones que definimos en si se encuentran 
+entre estos símbolos, pero su nombre o identificador ha cambiado debido a un proceso llamado **Name Mangling** necesario
+para la etapa de linking. Por ejemplo, dos funciones que tengan el mismo nombre pero se encuentren en librerías diferentes
+podrían causar que el enlazador tome los datos de una función en lugar de la otra por erorr.
+
+``readelf -s libsum.so``
 
 Obtendrás esto:
 
 .. code-block:: bash
 
+    S
+    Symbol table '.dynsym' contains 67 entries:
+       Num:    Value          Size Type    Bind   Vis      Ndx Name
+         0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+         1: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND getenv@GLIBC_2.2.5 (2)
+         2: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND dl_iterate_phdr@GLIBC_2.2.5 (2)
+         3: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND free@GLIBC_2.2.5 (2)
+         4: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND abort@GLIBC_2.2.5 (2)
+         5: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_Backtrace@GCC_3.3 (3)
+         6: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __errno_location@GLIBC_2.2.5 (4)
+         7: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_getattr_np@GLIBC_2.2.5 (4)
+         8: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _ITM_deregisterTMCloneTab
+         9: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND writev@GLIBC_2.2.5 (2)
+        10: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND sigaction@GLIBC_2.2.5 (4)
+        11: 0000000000000000     0 FUNC    WEAK   DEFAULT  UND __cxa_thread_atexit_impl@GLIBC_2.18 (5)
+        12: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __xpg_strerror_r@GLIBC_2.3.4 (6)
+        13: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND readlink@GLIBC_2.2.5 (2)
+        14: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_GetRegionStart@GCC_3.0 (7)
+        15: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND write@GLIBC_2.2.5 (4)
+        16: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_GetTextRelBase@GCC_3.0 (7)
+        17: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_RaiseException@GCC_3.0 (7)
+        18: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND strlen@GLIBC_2.2.5 (2)
+        19: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND mmap@GLIBC_2.2.5 (2)
+        20: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_setspecific@GLIBC_2.2.5 (4)
+        21: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_mutex_destroy@GLIBC_2.2.5 (4)
+        22: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND memset@GLIBC_2.2.5 (2)
+        23: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND getcwd@GLIBC_2.2.5 (2)
+        24: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_GetIPInfo@GCC_4.2.0 (8)
+        25: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND close@GLIBC_2.2.5 (4)
+        26: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_attr_getstack@GLIBC_2.2.5 (4)
+        27: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_GetLanguageSpecif@GCC_3.0 (7)
+        28: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND memchr@GLIBC_2.2.5 (2)
+        29: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __libc_start_main@GLIBC_2.2.5 (2)
+        30: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __tls_get_addr@GLIBC_2.3 (9)
+        31: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_rwlock_rdlock@GLIBC_2.2.5 (4)
+        32: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND calloc@GLIBC_2.2.5 (2)
+        33: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __fxstat64@GLIBC_2.2.5 (2)
+        34: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND signal@GLIBC_2.2.5 (2)
+        35: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND syscall@GLIBC_2.2.5 (2)
+        36: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND __gmon_start__
+        37: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND memcpy@GLIBC_2.14 (10)
+        38: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_GetIP@GCC_3.0 (7)
+        39: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_getspecific@GLIBC_2.2.5 (4)
+        40: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_mutex_unlock@GLIBC_2.2.5 (4)
+        41: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND malloc@GLIBC_2.2.5 (2)
+        42: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND bcmp@GLIBC_2.2.5 (2)
+        43: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_rwlock_unlock@GLIBC_2.2.5 (4)
+        44: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND realloc@GLIBC_2.2.5 (2)
+        45: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND munmap@GLIBC_2.2.5 (2)
+        46: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_key_create@GLIBC_2.2.5 (4)
+        47: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_GetDataRelBase@GCC_3.0 (7)
+        48: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND poll@GLIBC_2.2.5 (2)
+        49: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_SetGR@GCC_3.0 (7)
+        50: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND open64@GLIBC_2.2.5 (4)
+        51: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND memmove@GLIBC_2.2.5 (2)
+        52: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_self@GLIBC_2.2.5 (2)
+        53: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND mprotect@GLIBC_2.2.5 (2)
+        54: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND open@GLIBC_2.2.5 (4)
+        55: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND sysconf@GLIBC_2.2.5 (2)
+        56: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_attr_destroy@GLIBC_2.2.5 (2)
+        57: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_key_delete@GLIBC_2.2.5 (4)
+        58: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND posix_memalign@GLIBC_2.2.5 (2)
+        59: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _ITM_registerTMCloneTable
+        60: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_DeleteException@GCC_3.0 (7)
+        61: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND sigaltstack@GLIBC_2.2.5 (2)
+        62: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND dlsym@GLIBC_2.2.5 (11)
+        63: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_Resume@GCC_3.0 (7)
+        64: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_mutex_lock@GLIBC_2.2.5 (4)
+        65: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_SetIP@GCC_3.0 (7)
+        66: 0000000000000000     0 FUNC    WEAK   DEFAULT  UND __cxa_finalize@GLIBC_2.2.5 (2)
+    
+    Symbol table '.symtab' contains 674 entries:
+       Num:    Value          Size Type    Bind   Vis      Ndx Name
+         0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+         1: 00000000000002e0     0 SECTION LOCAL  DEFAULT    1 
+         2: 00000000000002fc     0 SECTION LOCAL  DEFAULT    2 
+         3: 0000000000000320     0 SECTION LOCAL  DEFAULT    3 
+         4: 0000000000000340     0 SECTION LOCAL  DEFAULT    4 
+         5: 0000000000000368     0 SECTION LOCAL  DEFAULT    5 
+         6: 00000000000009b0     0 SECTION LOCAL  DEFAULT    6 
+         7: 0000000000000de6     0 SECTION LOCAL  DEFAULT    7 
+         8: 0000000000000e70     0 SECTION LOCAL  DEFAULT    8 
+         9: 0000000000000f60     0 SECTION LOCAL  DEFAULT    9 
+        10: 00000000000047d0     0 SECTION LOCAL  DEFAULT   10 
+        11: 0000000000005000     0 SECTION LOCAL  DEFAULT   11 
+        12: 0000000000005020     0 SECTION LOCAL  DEFAULT   12 
+        13: 0000000000005060     0 SECTION LOCAL  DEFAULT   13 
+        14: 0000000000005070     0 SECTION LOCAL  DEFAULT   14 
+        15: 0000000000032914     0 SECTION LOCAL  DEFAULT   15 
+        16: 0000000000033000     0 SECTION LOCAL  DEFAULT   16 
+        17: 0000000000037780     0 SECTION LOCAL  DEFAULT   17 
+        18: 00000000000384a8     0 SECTION LOCAL  DEFAULT   18 
+        19: 000000000003cb98     0 SECTION LOCAL  DEFAULT   19 
+        20: 000000000003e8b0     0 SECTION LOCAL  DEFAULT   20 
+        21: 000000000003e8b0     0 SECTION LOCAL  DEFAULT   21 
+        22: 000000000003e8c0     0 SECTION LOCAL  DEFAULT   22 
+        23: 000000000003e8c8     0 SECTION LOCAL  DEFAULT   23 
+        24: 00000000000407d8     0 SECTION LOCAL  DEFAULT   24 
+        25: 0000000000040a08     0 SECTION LOCAL  DEFAULT   25 
+        26: 0000000000041000     0 SECTION LOCAL  DEFAULT   26 
+        27: 0000000000041050     0 SECTION LOCAL  DEFAULT   27 
+        28: 0000000000000000     0 SECTION LOCAL  DEFAULT   28 
+        29: 0000000000000000     0 SECTION LOCAL  DEFAULT   29 
+        30: 0000000000000000     0 SECTION LOCAL  DEFAULT   30 
+        31: 0000000000000000     0 SECTION LOCAL  DEFAULT   31 
+        32: 0000000000000000     0 SECTION LOCAL  DEFAULT   32 
+        33: 0000000000000000     0 SECTION LOCAL  DEFAULT   33 
+        34: 0000000000000000     0 SECTION LOCAL  DEFAULT   34 
+        35: 0000000000000000     0 SECTION LOCAL  DEFAULT   35 
+        36: 0000000000000000     0 SECTION LOCAL  DEFAULT   36 
+        37: 0000000000000000     0 SECTION LOCAL  DEFAULT   37 
+        38: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS std.9m6hw7w6-cgu.0
+        39: 000000000003cee0     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table1004
+        40: 000000000003cf2c     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table1005
+        41: 000000000003cf5c     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table1010
+        42: 000000000003cf6c     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table1013
+        43: 000000000003cf80     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table1014
+        44: 000000000003cf90     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table1015
+        45: 000000000003cf9c     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table1027
+        46: 000000000003cbc0     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table118
+        47: 000000000003cbcc     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table120
+        48: 000000000003cfc8     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table1217
+        49: 000000000003cfe4     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table1259
+        50: 000000000003d00c     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table1285
+        51: 000000000003d028     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table1286
+        52: 000000000003d040     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table1338
+        53: 000000000003d04c     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table1341
+        54: 000000000003d05c     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table1342
+        55: 000000000003d138     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table1343
+        56: 000000000003d158     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table1344
+        57: 000000000003d280     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table1348
+        58: 000000000003cbd8     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table135
+        59: 000000000003cbf0     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table151
+        60: 000000000003cbfc     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table207
+        61: 000000000003cc08     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table212
+        62: 000000000003cc14     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table220
+        63: 000000000003cc28     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table287
+        64: 000000000003cc38     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table305
+        65: 000000000003ccc0     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table306
+        66: 000000000003cce8     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table330
+        67: 000000000003cd04     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table352
+        68: 000000000003cd14     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table426
+        69: 000000000003cd24     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table497
+        70: 000000000003cd40     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table547
+        71: 000000000003cd58     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table651
+        72: 000000000003cd70     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table652
+        73: 000000000003cd88     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table653
+        74: 000000000003cda0     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table658
+        75: 000000000003cdb8     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table901
+        76: 000000000003cdd4     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table906
+        77: 000000000003cbb4     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table93
+        78: 000000000003ce0c     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table938
+        79: 000000000003ce24     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table940
+        80: 000000000003ce3c     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table941
+        81: 000000000003ce50     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table944
+        82: 000000000003ce60     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table975
+        83: 000000000003ce7c     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table976
+        84: 000000000003cea4     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table977
+        85: 000000000003cebc     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table981
+        86: 000000000003cecc     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table983
+        87: 0000000000007780    11 FUNC    LOCAL  DEFAULT   14 _ZN36_$LT$T$u20$as$u20$co
+        88: 0000000000007790    11 FUNC    LOCAL  DEFAULT   14 _ZN36_$LT$T$u20$as$u20$co
+        89: 00000000000077a0    11 FUNC    LOCAL  DEFAULT   14 _ZN36_$LT$T$u20$as$u20$co
+        90: 0000000000041080    40 OBJECT  LOCAL  DEFAULT   27 _ZN3std10sys_common11at_e
+        91: 00000000000410a8     8 OBJECT  LOCAL  DEFAULT   27 _ZN3std10sys_common11at_e
+        92: 0000000000015ad0   362 FUNC    LOCAL  DEFAULT   14 _ZN3std10sys_common11thre
+        93: 0000000000000020    56 TLS     LOCAL  DEFAULT   20 _ZN3std10sys_common11thre
+        94: 0000000000041018    16 OBJECT  LOCAL  DEFAULT   26 _ZN3std10sys_common17thre
+        95: 0000000000015e40   317 FUNC    LOCAL  DEFAULT   14 _ZN3std10sys_common17thre
+        96: 0000000000016070   150 FUNC    LOCAL  DEFAULT   14 _ZN3std10sys_common4util1
+        97: 0000000000016170   284 FUNC    LOCAL  DEFAULT   14 _ZN3std10sys_common4util1
+        98: 0000000000016110    87 FUNC    LOCAL  DEFAULT   14 _ZN3std10sys_common4util5
+        99: 00000000000410e0     8 OBJECT  LOCAL  DEFAULT   27 _ZN3std10sys_common7clean
+       100: 00000000000151d0    52 FUNC    LOCAL  DEFAULT   14 _ZN3std10sys_common9backt
+       101: 0000000000015440   326 FUNC    LOCAL  DEFAULT   14 _ZN3std10sys_common9backt
+       102: 0000000000015210   556 FUNC    LOCAL  DEFAULT   14 _ZN3std10sys_common9backt
+       103: 00000000000155d0   363 FUNC    LOCAL  DEFAULT   14 _ZN3std10sys_common9backt
+       104: 00000000000410d8     8 OBJECT  LOCAL  DEFAULT   27 _ZN3std10sys_common9backt
+       105: 0000000000015590    30 FUNC    LOCAL  DEFAULT   14 _ZN3std10sys_common9backt
+       106: 00000000000155b0    30 FUNC    LOCAL  DEFAULT   14 _ZN3std10sys_common9backt
+       107: 00000000000410b0    40 OBJECT  LOCAL  DEFAULT   27 _ZN3std10sys_common9backt
+       108: 0000000000017980  1603 FUNC    LOCAL  DEFAULT   14 _ZN3std12backtrace_rs5pri
+       109: 0000000000019330    68 FUNC    LOCAL  DEFAULT   14 _ZN3std12backtrace_rs9bac
+       110: 00000000000223e0   907 FUNC    LOCAL  DEFAULT   14 _ZN3std12backtrace_rs9sym
+       111: 00000000000411e0    48 OBJECT  LOCAL  DEFAULT   27 _ZN3std12backtrace_rs9sym
+       112: 0000000000019470   216 FUNC    LOCAL  DEFAULT   14 _ZN3std12backtrace_rs9sym
+       113: 0000000000019550 19413 FUNC    LOCAL  DEFAULT   14 _ZN3std12backtrace_rs9sym
+       114: 000000000001e130   662 FUNC    LOCAL  DEFAULT   14 _ZN3std12backtrace_rs9sym
+       115: 000000000001e3d0 16400 FUNC    LOCAL  DEFAULT   14 _ZN3std12backtrace_rs9sym
+       116: 0000000000022770   986 FUNC    LOCAL  DEFAULT   14 _ZN3std12backtrace_rs9sym
+       117: 0000000000017890   228 FUNC    LOCAL  DEFAULT   14 _ZN3std12backtrace_rs9sym
+       118: 00000000000134e0   620 FUNC    LOCAL  DEFAULT   14 _ZN3std2io5Write18write_a
+       119: 0000000000013750   579 FUNC    LOCAL  DEFAULT   14 _ZN3std2io5Write18write_a
+       120: 00000000000133f0   236 FUNC    LOCAL  DEFAULT   14 _ZN3std2io5Write9write_al
+       121: 00000000000139a0   323 FUNC    LOCAL  DEFAULT   14 _ZN3std2io5Write9write_fm
+       122: 0000000000013af0   323 FUNC    LOCAL  DEFAULT   14 _ZN3std2io5Write9write_fm
+       123: 00000000000131d0   397 FUNC    LOCAL  DEFAULT   14 _ZN3std2io5impls74_$LT$im
+       124: 0000000000013360     3 FUNC    LOCAL  DEFAULT   14 _ZN3std2io5impls74_$LT$im
+       125: 00000000000133e0     8 FUNC    LOCAL  DEFAULT   14 _ZN3std2io5impls74_$LT$im
+       126: 0000000000013160   107 FUNC    LOCAL  DEFAULT   14 _ZN3std2io5impls74_$LT$im
+       127: 0000000000013370   103 FUNC    LOCAL  DEFAULT   14 _ZN3std2io5impls74_$LT$im
+       128: 0000000000000000    24 TLS     LOCAL  DEFAULT   20 _ZN3std2io5stdio14OUTPUT_
+       129: 0000000000041210     1 OBJECT  LOCAL  DEFAULT   27 _ZN3std2io5stdio19OUTPUT_
+       130: 0000000000019040    12 FUNC    LOCAL  DEFAULT   14 _ZN3std3sys4unix14abort_i
+       131: 0000000000018bf0   470 FUNC    LOCAL  DEFAULT   14 _ZN3std3sys4unix14stack_o
+       132: 00000000000411d0     8 OBJECT  LOCAL  DEFAULT   27 _ZN3std3sys4unix14stack_o
+       133: 0000000000041211     1 OBJECT  LOCAL  DEFAULT   27 _ZN3std3sys4unix14stack_o
+       134: 0000000000018970   636 FUNC    LOCAL  DEFAULT   14 _ZN3std3sys4unix14stack_o
+       135: 0000000000018140   363 FUNC    LOCAL  DEFAULT   14 _ZN3std3sys4unix2fs4File6
+       136: 0000000000041212     1 OBJECT  LOCAL  DEFAULT   27 _ZN3std3sys4unix2fs9try_s
+       137: 0000000000019050   728 FUNC    LOCAL  DEFAULT   14 _ZN3std3sys4unix2fs9try_s
+       138: 0000000000041038    24 OBJECT  LOCAL  DEFAULT   26 _ZN3std3sys4unix2fs9try_s
+       139: 00000000000185b0   310 FUNC    LOCAL  DEFAULT   14 _ZN3std3sys4unix2os12erro
+       140: 00000000000186f0   630 FUNC    LOCAL  DEFAULT   14 _ZN3std3sys4unix2os6geten
+       141: 0000000000041188    72 OBJECT  LOCAL  DEFAULT   27 _ZN3std3sys4unix2os8ENV_L
+       142: 0000000000018100    55 FUNC    LOCAL  DEFAULT   14 _ZN3std3sys4unix4args3imp
+       143: 000000000003e8b0     8 OBJECT  LOCAL  DEFAULT   21 _ZN3std3sys4unix4args3imp
+       144: 0000000000041150     8 OBJECT  LOCAL  DEFAULT   27 _ZN3std3sys4unix4args3imp
+       145: 0000000000041158     8 OBJECT  LOCAL  DEFAULT   27 _ZN3std3sys4unix4args3imp
+       146: 0000000000041160    40 OBJECT  LOCAL  DEFAULT   27 _ZN3std3sys4unix4args3imp
+       147: 00000000000068a0   104 FUNC    LOCAL  DEFAULT   14 _ZN3std3sys4unix4weak13We
+       148: 00000000000411d8     8 OBJECT  LOCAL  DEFAULT   27 _ZN3std3sys4unix6thread5g
+       149: 0000000000014190   646 FUNC    LOCAL  DEFAULT   14 _ZN3std4path10Components2
+       150: 0000000000014c90   547 FUNC    LOCAL  DEFAULT   14 _ZN3std4sync4once4Once9ca
+       151: 0000000000016290    92 FUNC    LOCAL  DEFAULT   14 _ZN3std5alloc24default_al
+       152: 00000000000410e8     8 OBJECT  LOCAL  DEFAULT   27 _ZN3std5alloc4HOOK17h01f9
+       153: 0000000000012650    39 FUNC    LOCAL  DEFAULT   14 _ZN3std6thread5local4fast
+       154: 0000000000012680   172 FUNC    LOCAL  DEFAULT   14 _ZN3std6thread5local4fast
+       155: 0000000000012730   183 FUNC    LOCAL  DEFAULT   14 _ZN3std6thread5local4fast
+       156: 00000000000127f0    42 FUNC    LOCAL  DEFAULT   14 _ZN3std6thread5local4fast
+       157: 0000000000012820    47 FUNC    LOCAL  DEFAULT   14 _ZN3std6thread5local4fast
+       158: 0000000000041058    40 OBJECT  LOCAL  DEFAULT   27 _ZN3std6thread8ThreadId3n
+       159: 0000000000041010     8 OBJECT  LOCAL  DEFAULT   26 _ZN3std6thread8ThreadId3n
+       160: 0000000000006870    46 FUNC    LOCAL  DEFAULT   14 _ZN3std9panicking11begin_
+       161: 0000000000017120    38 FUNC    LOCAL  DEFAULT   14 _ZN3std9panicking11begin_
+       162: 0000000000000060    24 TLS     LOCAL  DEFAULT   20 _ZN3std9panicking11panic_
+       163: 0000000000016540  1583 FUNC    LOCAL  DEFAULT   14 _ZN3std9panicking12defaul
+       164: 0000000000041028     1 OBJECT  LOCAL  DEFAULT   26 _ZN3std9panicking12defaul
+       165: 0000000000016b70   673 FUNC    LOCAL  DEFAULT   14 _ZN3std9panicking12defaul
+       166: 0000000000016e70   174 FUNC    LOCAL  DEFAULT   14 _ZN3std9panicking19begin_
+       167: 0000000000041138    16 OBJECT  LOCAL  DEFAULT   27 _ZN3std9panicking4HOOK17h
+       168: 00000000000410f0    72 OBJECT  LOCAL  DEFAULT   27 _ZN3std9panicking9HOOK_LO
+       169: 00000000000077b0   130 FUNC    LOCAL  DEFAULT   14 _ZN42_$LT$$RF$T$u20$as$u2
+       170: 0000000000007840    86 FUNC    LOCAL  DEFAULT   14 _ZN42_$LT$$RF$T$u20$as$u2
+       171: 00000000000078a0    86 FUNC    LOCAL  DEFAULT   14 _ZN42_$LT$$RF$T$u20$as$u2
+       172: 0000000000007900    19 FUNC    LOCAL  DEFAULT   14 _ZN42_$LT$$RF$T$u20$as$u2
+       173: 0000000000007920    86 FUNC    LOCAL  DEFAULT   14 _ZN42_$LT$$RF$T$u20$as$u2
+       174: 0000000000007980     9 FUNC    LOCAL  DEFAULT   14 _ZN44_$LT$$RF$T$u20$as$u2
+       175: 0000000000007990    19 FUNC    LOCAL  DEFAULT   14 _ZN44_$LT$$RF$T$u20$as$u2
+       176: 00000000000079b0     9 FUNC    LOCAL  DEFAULT   14 _ZN45_$LT$$RF$T$u20$as$u2
+       177: 00000000000079c0   264 FUNC    LOCAL  DEFAULT   14 _ZN4core3fmt5Write10write
+       178: 0000000000007ad0   216 FUNC    LOCAL  DEFAULT   14 _ZN4core3fmt5Write10write
+       179: 0000000000007bb0    63 FUNC    LOCAL  DEFAULT   14 _ZN4core3fmt5Write9write_
+       180: 0000000000007bf0    63 FUNC    LOCAL  DEFAULT   14 _ZN4core3fmt5Write9write_
+       181: 0000000000007c30   112 FUNC    LOCAL  DEFAULT   14 _ZN4core3ops8function6FnO
+       182: 0000000000007ca0     5 FUNC    LOCAL  DEFAULT   14 _ZN4core3ops8function6FnO
+       183: 0000000000007cb0     5 FUNC    LOCAL  DEFAULT   14 _ZN4core3ops8function6FnO
+       184: 0000000000007cc0    21 FUNC    LOCAL  DEFAULT   14 _ZN4core3ops8function6FnO
+       185: 0000000000007ce0     1 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr100drop_in_pl
+       186: 0000000000007cf0    19 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr101drop_in_pl
+       187: 0000000000007d10    22 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr109drop_in_pl
+       188: 0000000000007d30    34 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr111drop_in_pl
+       189: 0000000000007d60     5 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr115drop_in_pl
+       190: 0000000000007d70   100 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr123drop_in_pl
+       191: 0000000000007de0    39 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr125drop_in_pl
+       192: 0000000000007e10    93 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr125drop_in_pl
+       193: 0000000000007e70    85 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr131drop_in_pl
+       194: 0000000000007ed0    40 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr137drop_in_pl
+       195: 0000000000007f00   192 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr146drop_in_pl
+       196: 0000000000007fc0    30 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr147drop_in_pl
+       197: 0000000000007fe0   160 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr153drop_in_pl
+       198: 0000000000008080    42 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr154drop_in_pl
+       199: 00000000000080b0    38 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr158drop_in_pl
+       200: 00000000000080e0    35 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr164drop_in_pl
+       201: 0000000000008110    42 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr169drop_in_pl
+       202: 0000000000008140   218 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr170drop_in_pl
+       203: 0000000000008220   215 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr174drop_in_pl
+       204: 0000000000008300    15 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr181drop_in_pl
+       205: 0000000000008310    32 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr226drop_in_pl
+       206: 0000000000008330    71 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr246drop_in_pl
+       207: 0000000000008380    33 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr264drop_in_pl
+       208: 00000000000083b0   185 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr269drop_in_pl
+       209: 0000000000008470     5 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr275drop_in_pl
+       210: 0000000000008480     6 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr34drop_in_pla
+       211: 0000000000008490    19 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr40drop_in_pla
+       212: 00000000000084b0   117 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr42drop_in_pla
+       213: 0000000000008530    33 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr44drop_in_pla
+       214: 0000000000008560    36 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr44drop_in_pla
+       215: 0000000000008590    24 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr44drop_in_pla
+       216: 00000000000085b0    30 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr45drop_in_pla
+       217: 00000000000085d0    33 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr46drop_in_pla
+       218: 0000000000008600    59 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr46drop_in_pla
+       219: 0000000000008640     6 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr49drop_in_pla
+       220: 0000000000008650    39 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr50drop_in_pla
+       221: 0000000000008680    42 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr52drop_in_pla
+       222: 00000000000086b0   447 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr55drop_in_pla
+       223: 0000000000008870     9 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr61drop_in_pla
+       224: 0000000000008880    35 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr64drop_in_pla
+       225: 00000000000088b0     9 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr64drop_in_pla
+       226: 00000000000088c0   151 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr65drop_in_pla
+       227: 0000000000008960    70 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr65drop_in_pla
+       228: 00000000000089b0   286 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr65drop_in_pla
+       229: 0000000000008ad0   146 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr67drop_in_pla
+       230: 0000000000008b70    24 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr68drop_in_pla
+       231: 0000000000008b90     6 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr68drop_in_pla
+       232: 0000000000008ba0    43 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr69drop_in_pla
+       233: 0000000000008bd0   151 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr70drop_in_pla
+       234: 0000000000008c70    33 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr70drop_in_pla
+       235: 0000000000008ca0    35 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr73drop_in_pla
+       236: 0000000000008cd0    35 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr73drop_in_pla
+       237: 0000000000008d00    38 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr78drop_in_pla
+       238: 0000000000008d30     9 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr81drop_in_pla
+       239: 0000000000008d40    21 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr83drop_in_pla
+       240: 0000000000008d60    24 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr84drop_in_pla
+       241: 0000000000008d80   240 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr86drop_in_pla
+       242: 0000000000008e70   118 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr87drop_in_pla
+       243: 0000000000008ef0    32 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr88drop_in_pla
+       244: 0000000000008f10    26 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr89drop_in_pla
+       245: 0000000000008f30   158 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr91drop_in_pla
+       246: 0000000000008fd0  1281 FUNC    LOCAL  DEFAULT   14 _ZN4core3str21_$LT$impl$u
+       247: 0000000000005070   534 FUNC    LOCAL  DEFAULT   14 _ZN4core5slice4sort14brea
+       248: 0000000000005290   704 FUNC    LOCAL  DEFAULT   14 _ZN4core5slice4sort22part
+       249: 00000000000094e0  3364 FUNC    LOCAL  DEFAULT   14 _ZN4core5slice4sort7recur
+       250: 0000000000005550   607 FUNC    LOCAL  DEFAULT   14 _ZN4core5slice4sort8heaps
+       251: 000000000000a210    40 FUNC    LOCAL  DEFAULT   14 _ZN4core6option15Option$L
+       252: 000000000000a240    36 FUNC    LOCAL  DEFAULT   14 _ZN4core6option15Option$L
+       253: 00000000000057b0    77 FUNC    LOCAL  DEFAULT   14 _ZN4core9panicking13asser
+       254: 0000000000005800    79 FUNC    LOCAL  DEFAULT   14 _ZN4core9panicking13asser
+       255: 000000000000a270   107 FUNC    LOCAL  DEFAULT   14 _ZN50_$LT$$BP$mut$u20$T$u
+       256: 000000000000a2e0   301 FUNC    LOCAL  DEFAULT   14 _ZN50_$LT$$RF$mut$u20$W$u
+       257: 000000000000a410   276 FUNC    LOCAL  DEFAULT   14 _ZN50_$LT$$RF$mut$u20$W$u
+       258: 000000000000a530   219 FUNC    LOCAL  DEFAULT   14 _ZN50_$LT$$RF$mut$u20$W$u
+       259: 000000000000a610    66 FUNC    LOCAL  DEFAULT   14 _ZN50_$LT$$RF$mut$u20$W$u
+       260: 000000000000a660    66 FUNC    LOCAL  DEFAULT   14 _ZN50_$LT$$RF$mut$u20$W$u
+       261: 000000000000a6b0    66 FUNC    LOCAL  DEFAULT   14 _ZN50_$LT$$RF$mut$u20$W$u
+       262: 000000000000a700     8 FUNC    LOCAL  DEFAULT   14 _ZN50_$LT$$RF$mut$u20$W$u
+       263: 000000000000a710   103 FUNC    LOCAL  DEFAULT   14 _ZN50_$LT$$RF$mut$u20$W$u
+       264: 000000000000a780   100 FUNC    LOCAL  DEFAULT   14 _ZN50_$LT$$RF$mut$u20$W$u
+       265: 000000000000a7f0    76 FUNC    LOCAL  DEFAULT   14 _ZN5alloc4sync12Arc$LT$T$
+       266: 000000000000a840    99 FUNC    LOCAL  DEFAULT   14 _ZN5alloc4sync12Arc$LT$T$
+       267: 000000000000a8b0    23 FUNC    LOCAL  DEFAULT   14 _ZN5alloc5alloc8box_free1
+       268: 000000000000a8d0    16 FUNC    LOCAL  DEFAULT   14 _ZN5alloc5alloc8box_free1
+       269: 000000000000a8e0   139 FUNC    LOCAL  DEFAULT   14 _ZN5alloc7raw_vec11finish
+       270: 0000000000005850   185 FUNC    LOCAL  DEFAULT   14 _ZN5alloc7raw_vec19RawVec
+       271: 0000000000005910   185 FUNC    LOCAL  DEFAULT   14 _ZN5alloc7raw_vec19RawVec
+       272: 00000000000059d0   205 FUNC    LOCAL  DEFAULT   14 _ZN5alloc7raw_vec19RawVec
+       273: 0000000000005aa0   205 FUNC    LOCAL  DEFAULT   14 _ZN5alloc7raw_vec19RawVec
+       274: 0000000000005b70   185 FUNC    LOCAL  DEFAULT   14 _ZN5alloc7raw_vec19RawVec
+       275: 0000000000005c30   201 FUNC    LOCAL  DEFAULT   14 _ZN5alloc7raw_vec19RawVec
+       276: 0000000000005d00   205 FUNC    LOCAL  DEFAULT   14 _ZN5alloc7raw_vec19RawVec
+       277: 0000000000005dd0   150 FUNC    LOCAL  DEFAULT   14 _ZN5alloc7raw_vec19RawVec
+       278: 0000000000005e70   211 FUNC    LOCAL  DEFAULT   14 _ZN5alloc7raw_vec19RawVec
+       279: 0000000000005f50   205 FUNC    LOCAL  DEFAULT   14 _ZN5alloc7raw_vec19RawVec
+       280: 0000000000006020   204 FUNC    LOCAL  DEFAULT   14 _ZN5alloc7raw_vec19RawVec
+       281: 00000000000060f0   185 FUNC    LOCAL  DEFAULT   14 _ZN5alloc7raw_vec19RawVec
+       282: 00000000000061b0   182 FUNC    LOCAL  DEFAULT   14 _ZN5alloc7raw_vec19RawVec
+       283: 000000000000a970   964 FUNC    LOCAL  DEFAULT   14 _ZN5gimli4read4line15File
+       284: 000000000000ad40  2516 FUNC    LOCAL  DEFAULT   14 _ZN5gimli4read4line15pars
+       285: 000000000000b720   501 FUNC    LOCAL  DEFAULT   14 _ZN5gimli4read4line27File
+       286: 000000000000b920  4718 FUNC    LOCAL  DEFAULT   14 _ZN5gimli4read4unit15pars
+       287: 000000000000cb90  2069 FUNC    LOCAL  DEFAULT   14 _ZN5gimli4read4unit18Attr
+       288: 000000000000d3b0   567 FUNC    LOCAL  DEFAULT   14 _ZN5gimli4read5dwarf14Dwa
+       289: 000000000000d5f0   378 FUNC    LOCAL  DEFAULT   14 _ZN5gimli4read6reader6Rea
+       290: 000000000000d770  2709 FUNC    LOCAL  DEFAULT   14 _ZN5gimli4read8rnglists20
+       291: 000000000000e210    19 FUNC    LOCAL  DEFAULT   14 _ZN60_$LT$alloc..string..
+       292: 0000000000018040   187 FUNC    LOCAL  DEFAULT   14 _ZN61_$LT$std..path..Comp
+       293: 0000000000018e90     3 FUNC    LOCAL  DEFAULT   14 _ZN64_$LT$std..sys..unix.
+       294: 0000000000013c40   100 FUNC    LOCAL  DEFAULT   14 _ZN80_$LT$std..io..Write.
+       295: 0000000000013cb0   403 FUNC    LOCAL  DEFAULT   14 _ZN80_$LT$std..io..Write.
+       296: 000000000000e230   774 FUNC    LOCAL  DEFAULT   14 _ZN90_$LT$gimli..read..un
+       297: 00000000000171b0    30 FUNC    LOCAL  DEFAULT   14 _ZN91_$LT$std..panicking.
+       298: 0000000000017150    95 FUNC    LOCAL  DEFAULT   14 _ZN91_$LT$std..panicking.
+       299: 000000000000e540   632 FUNC    LOCAL  DEFAULT   14 _ZN94_$LT$alloc..collecti
+       300: 000000000000e7c0  9392 FUNC    LOCAL  DEFAULT   14 _ZN9addr2line16ResUnit$LT
+       301: 0000000000010c70   972 FUNC    LOCAL  DEFAULT   14 _ZN9addr2line16ResUnit$LT
+       302: 0000000000011040   353 FUNC    LOCAL  DEFAULT   14 _ZN9addr2line16ResUnit$LT
+       303: 00000000000111b0  3988 FUNC    LOCAL  DEFAULT   14 _ZN9addr2line17Function$L
+       304: 0000000000012150  1216 FUNC    LOCAL  DEFAULT   14 _ZN9addr2line9name_attr17
+       305: 0000000000041030     8 OBJECT  LOCAL  DEFAULT   26 _rust_extern_with_linkage
+       306: 00000000000341a0    25 OBJECT  LOCAL  DEFAULT   16 str.5
+       307: 00000000000341c0    57 OBJECT  LOCAL  DEFAULT   16 str.6
+       308: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS addr2line.c1wbpybl-cgu.0
+       309: 0000000000026570   139 FUNC    LOCAL  DEFAULT   14 _ZN5alloc7raw_vec11finish
+       310: 0000000000006910   150 FUNC    LOCAL  DEFAULT   14 _ZN5alloc7raw_vec19RawVec
+       311: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS gimli.6pztyi9p-cgu.0
+       312: 000000000003d2ac     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table56
+       313: 000000000003d304     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table57
+       314: 000000000003d310     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table59
+       315: 0000000000026720    86 FUNC    LOCAL  DEFAULT   14 _ZN42_$LT$$RF$T$u20$as$u2
+       316: 0000000000026780     1 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr112drop_in_pl
+       317: 0000000000026790    19 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr134drop_in_pl
+       318: 00000000000267b0    19 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr138drop_in_pl
+       319: 00000000000267d0    42 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr52drop_in_pla
+       320: 0000000000026800    43 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr54drop_in_pla
+       321: 0000000000026830    43 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr68drop_in_pla
+       322: 0000000000026860    35 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr87drop_in_pla
+       323: 00000000000069b0    96 FUNC    LOCAL  DEFAULT   14 _ZN4core9panicking13asser
+       324: 0000000000026890   139 FUNC    LOCAL  DEFAULT   14 _ZN5alloc7raw_vec11finish
+       325: 0000000000006a10   201 FUNC    LOCAL  DEFAULT   14 _ZN5alloc7raw_vec19RawVec
+       326: 0000000000006ae0   185 FUNC    LOCAL  DEFAULT   14 _ZN5alloc7raw_vec19RawVec
+       327: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS alloc.bdtv0pny-cgu.0
+       328: 000000000003d320     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table31
+       329: 000000000002d9c0    32 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr42drop_in_pla
+       330: 000000000002da60   139 FUNC    LOCAL  DEFAULT   14 _ZN5alloc7raw_vec11finish
+       331: 0000000000006bb0   150 FUNC    LOCAL  DEFAULT   14 _ZN5alloc7raw_vec19RawVec
+       332: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS core.2eb9xv2h-cgu.0
+       333: 000000000002dfd0    11 FUNC    LOCAL  DEFAULT   14 _ZN36_$LT$T$u20$as$u20$co
+       334: 0000000000032150   152 FUNC    LOCAL  DEFAULT   14 _ZN42_$LT$$RF$T$u20$as$u2
+       335: 00000000000321f0    16 FUNC    LOCAL  DEFAULT   14 _ZN42_$LT$$RF$T$u20$as$u2
+       336: 0000000000032200     8 FUNC    LOCAL  DEFAULT   14 _ZN42_$LT$$RF$T$u20$as$u2
+       337: 0000000000032210   376 FUNC    LOCAL  DEFAULT   14 _ZN42_$LT$$RF$T$u20$as$u2
+       338: 0000000000032390   249 FUNC    LOCAL  DEFAULT   14 _ZN42_$LT$$RF$T$u20$as$u2
+       339: 0000000000032490    19 FUNC    LOCAL  DEFAULT   14 _ZN44_$LT$$RF$T$u20$as$u2
+       340: 0000000000031af0   555 FUNC    LOCAL  DEFAULT   14 _ZN4core3fmt3num52_$LT$im
+       341: 000000000002eb50   220 FUNC    LOCAL  DEFAULT   14 _ZN4core3fmt5Write10write
+       342: 000000000002ec30    63 FUNC    LOCAL  DEFAULT   14 _ZN4core3fmt5Write9write_
+       343: 000000000002e9f0   282 FUNC    LOCAL  DEFAULT   14 _ZN4core3fmt8builders10De
+       344: 000000000002f590    79 FUNC    LOCAL  DEFAULT   14 _ZN4core3fmt9Formatter12p
+       345: 000000000002dde0   358 FUNC    LOCAL  DEFAULT   14 _ZN4core3num14from_str_ra
+       346: 000000000002ddb0    18 FUNC    LOCAL  DEFAULT   14 _ZN4core3ops8function6FnO
+       347: 000000000002ddd0     1 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr102drop_in_pl
+       348: 0000000000036cac   256 OBJECT  LOCAL  DEFAULT   16 _ZN4core3str11validations
+       349: 00000000000367b0    16 OBJECT  LOCAL  DEFAULT   16 _ZN4core7unicode12unicode
+       350: 0000000000037450   124 OBJECT  LOCAL  DEFAULT   16 _ZN4core7unicode12unicode
+       351: 00000000000374cc   689 OBJECT  LOCAL  DEFAULT   16 _ZN4core7unicode12unicode
+       352: 000000000002ec80   223 FUNC    LOCAL  DEFAULT   14 _ZN50_$LT$$RF$mut$u20$W$u
+       353: 000000000002ed60    66 FUNC    LOCAL  DEFAULT   14 _ZN50_$LT$$RF$mut$u20$W$u
+       354: 000000000002ec70     9 FUNC    LOCAL  DEFAULT   14 _ZN50_$LT$$RF$mut$u20$W$u
+       355: 000000000002df50   128 FUNC    LOCAL  DEFAULT   14 _ZN71_$LT$core..ops..rang
+       356: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS crtstuff.c
+       357: 00000000000074c0     0 FUNC    LOCAL  DEFAULT   14 deregister_tm_clones
+       358: 00000000000074f0     0 FUNC    LOCAL  DEFAULT   14 register_tm_clones
+       359: 0000000000007530     0 FUNC    LOCAL  DEFAULT   14 __do_global_dtors_aux
+       360: 0000000000041050     1 OBJECT  LOCAL  DEFAULT   27 completed.8060
+       361: 000000000003e8c0     0 OBJECT  LOCAL  DEFAULT   22 __do_global_dtors_aux_fin
+       362: 0000000000007570     0 FUNC    LOCAL  DEFAULT   14 frame_dummy
+       363: 000000000003e8b8     0 OBJECT  LOCAL  DEFAULT   21 __frame_dummy_init_array_
+       364: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS sum.7rcbfp3g-cgu.0
+       365: 0000000000007580     1 FUNC    LOCAL  DEFAULT   14 _ZN3sum4main17h5c177a5c7e
+       366: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS sum.7rcbfp3g-cgu.1
+       367: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS sum.7rcbfp3g-cgu.2
+       368: 0000000000007620    29 FUNC    LOCAL  DEFAULT   14 _ZN68_$LT$std..process..E
+       369: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS sum.7rcbfp3g-cgu.3
+       370: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS sum.7rcbfp3g-cgu.4
+       371: 000000000003cb98     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table1
+       372: 0000000000007670    68 FUNC    LOCAL  DEFAULT   14 _ZN4core3ops8function6FnO
+       373: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS sum.7rcbfp3g-cgu.5
+       374: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS sum.7rcbfp3g-cgu.6
+       375: 000000000003cba4     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table0
+       376: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS t77eubk5xk9tcs0
+       377: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS panic_unwind.b34o5za4-cgu
+       378: 000000000003d2a0     0 NOTYPE  LOCAL  DEFAULT   19 GCC_except_table2
+       379: 0000000000022c20   381 FUNC    LOCAL  DEFAULT   14 _ZN12panic_unwind5dwarf2e
+       380: 0000000000022e90    12 FUNC    LOCAL  DEFAULT   14 _ZN12panic_unwind8real_im
+       381: 0000000000022ea0    12 FUNC    LOCAL  DEFAULT   14 _ZN12panic_unwind8real_im
+       382: 0000000000022e70    24 FUNC    LOCAL  DEFAULT   14 _ZN12panic_unwind8real_im
+       383: 0000000000022b50    12 FUNC    LOCAL  DEFAULT   14 _ZN4core3ops8function6FnO
+       384: 0000000000022b60    12 FUNC    LOCAL  DEFAULT   14 _ZN4core3ops8function6FnO
+       385: 0000000000022b70   106 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr79drop_in_pla
+       386: 0000000000022be0     1 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr88drop_in_pla
+       387: 0000000000022bf0    23 FUNC    LOCAL  DEFAULT   14 _ZN5alloc5alloc8box_free1
+       388: 0000000000022c10    16 FUNC    LOCAL  DEFAULT   14 _ZN5alloc5alloc8box_free1
+       389: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS miniz_oxide.9nze787t-cgu.
+       390: 0000000000023b20   503 FUNC    LOCAL  DEFAULT   14 _ZN11miniz_oxide7inflate4
+       391: 0000000000023840   721 FUNC    LOCAL  DEFAULT   14 _ZN11miniz_oxide7inflate4
+       392: 00000000000231c0  1662 FUNC    LOCAL  DEFAULT   14 _ZN11miniz_oxide7inflate4
+       393: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS adler.72iv9051-cgu.0
+       394: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS object.1n0j33gf-cgu.0
+       395: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS rustc_demangle.axzg541g-c
+       396: 000000000002a190   423 FUNC    LOCAL  DEFAULT   14 _ZN14rustc_demangle2v06Pa
+       397: 0000000000029410   529 FUNC    LOCAL  DEFAULT   14 _ZN14rustc_demangle2v06Pa
+       398: 0000000000029630  1509 FUNC    LOCAL  DEFAULT   14 _ZN14rustc_demangle2v06Pa
+       399: 0000000000029c20  1383 FUNC    LOCAL  DEFAULT   14 _ZN14rustc_demangle2v06Pa
+       400: 000000000002a410  2177 FUNC    LOCAL  DEFAULT   14 _ZN14rustc_demangle2v07Pr
+       401: 000000000002adc0  3125 FUNC    LOCAL  DEFAULT   14 _ZN14rustc_demangle2v07Pr
+       402: 000000000002ba00  1161 FUNC    LOCAL  DEFAULT   14 _ZN14rustc_demangle2v07Pr
+       403: 000000000002c230  1712 FUNC    LOCAL  DEFAULT   14 _ZN14rustc_demangle2v07Pr
+       404: 000000000002c0c0   356 FUNC    LOCAL  DEFAULT   14 _ZN14rustc_demangle2v07Pr
+       405: 000000000002c8e0   667 FUNC    LOCAL  DEFAULT   14 _ZN14rustc_demangle2v07Pr
+       406: 000000000002aca0   284 FUNC    LOCAL  DEFAULT   14 _ZN14rustc_demangle2v07Pr
+       407: 000000000002a340   208 FUNC    LOCAL  DEFAULT   14 _ZN14rustc_demangle2v07Pr
+       408: 000000000002be90   545 FUNC    LOCAL  DEFAULT   14 _ZN14rustc_demangle2v07Pr
+       409: 0000000000028140     1 FUNC    LOCAL  DEFAULT   14 _ZN4core3ptr33drop_in_pla
+       410: 0000000000028150   547 FUNC    LOCAL  DEFAULT   14 _ZN81_$LT$core..str..patt
+       411: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS compiler_builtins.84hxjow
+       412: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS compiler_builtins.84hxjow
+       413: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS crtstuff.c
+       414: 000000000003cb94     0 OBJECT  LOCAL  DEFAULT   18 __FRAME_END__
+       415: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS 
+       416: 0000000000016420   120 FUNC    LOCAL  DEFAULT   14 __rdl_alloc_zeroed
+       417: 0000000000016320    75 FUNC    LOCAL  DEFAULT   14 __rdl_alloc
+       418: 0000000000007640     4 FUNC    LOCAL  DEFAULT   14 _ZN3std3sys4unix7process1
+       419: 00000000000075b0    48 FUNC    LOCAL  DEFAULT   14 _ZN3std2rt10lang_start17h
+       420: 00000000000076e0     6 FUNC    LOCAL  DEFAULT   14 _ZN4core4hint9black_box17
+       421: 0000000000016370     6 FUNC    LOCAL  DEFAULT   14 __rdl_dealloc
+       422: 0000000000016380   150 FUNC    LOCAL  DEFAULT   14 __rdl_realloc
+       423: 000000000003e8c0     0 NOTYPE  LOCAL  DEFAULT   21 __init_array_end
+       424: 00000000000076c0     8 FUNC    LOCAL  DEFAULT   14 _ZN4core3ops8function6FnO
+       425: 00000000000075e0    27 FUNC    LOCAL  DEFAULT   14 _ZN3std2rt10lang_start28_
+       426: 000000000002d9e0    12 FUNC    LOCAL  DEFAULT   14 __rg_oom
+       427: 00000000000076f0    51 FUNC    LOCAL  DEFAULT   14 _ZN3std10sys_common9backt
+       428: 00000000000407d8     0 OBJECT  LOCAL  DEFAULT   24 _DYNAMIC
+       429: 000000000003e8b0     0 NOTYPE  LOCAL  DEFAULT   21 __init_array_start
+       430: 0000000000007600    21 FUNC    LOCAL  DEFAULT   14 _ZN54_$LT$$LP$$RP$$u20$as
+       431: 0000000000037780     0 NOTYPE  LOCAL  DEFAULT   17 __GNU_EH_FRAME_HDR
+       432: 0000000000040a08     0 OBJECT  LOCAL  DEFAULT   25 _GLOBAL_OFFSET_TABLE_
+       433: 0000000000005000     0 FUNC    LOCAL  DEFAULT   11 _init
+       434: 00000000000328f0     5 FUNC    GLOBAL DEFAULT   14 __libc_csu_fini
+       435: 0000000000028110    47 FUNC    GLOBAL DEFAULT   14 _ZN5gimli4read4unit20allo
+       436: 0000000000031350   654 FUNC    GLOBAL DEFAULT   14 _ZN4core7unicode9printabl
+       437: 00000000000317d0   146 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt3num52_$LT$im
+       438: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND getenv@@GLIBC_2.2.5
+       439: 00000000000182b0   768 FUNC    GLOBAL DEFAULT   14 _ZN3std3sys4unix2fs8readl
+       440: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND dl_iterate_phdr@@GLIBC_2.
+       441: 0000000000006280  1189 FUNC    GLOBAL DEFAULT   14 _ZN3std4sync4once4Once10c
+       442: 0000000000018eb0   317 FUNC    GLOBAL DEFAULT   14 _ZN3std3sys4unix17thread_
+       443: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND free@@GLIBC_2.2.5
+       444: 0000000000026a60  5143 FUNC    GLOBAL DEFAULT   14 _ZN5gimli4read6abbrev13Ab
+       445: 0000000000031730   146 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt3num52_$LT$im
+       446: 0000000000006730    90 FUNC    GLOBAL DEFAULT   14 _ZN3std9panicking11panic_
+       447: 0000000000031870   146 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt3num53_$LT$im
+       448: 0000000000017390   112 FUNC    GLOBAL DEFAULT   14 rust_panic
+       449: 0000000000015740   904 FUNC    GLOBAL DEFAULT   14 _ZN73_$LT$std..sys_common
+       450: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND abort@@GLIBC_2.2.5
+       451: 0000000000031a50   149 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt3num55_$LT$im
+       452: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_Backtrace@@GCC_3.
+       453: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __errno_location@@GLIBC_2
+       454: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_getattr_np@@GLIBC
+       455: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _ITM_deregisterTMCloneTab
+       456: 0000000000012610    51 FUNC    GLOBAL DEFAULT   14 _ZN68_$LT$std..thread..lo
+       457: 0000000000031d20   141 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt3num3imp51_$L
+       458: 000000000002edc0    54 FUNC    GLOBAL DEFAULT   14 _ZN59_$LT$core..fmt..Argu
+       459: 00000000000280e0    42 FUNC    GLOBAL DEFAULT   14 _ZN5gimli4read4line7LineR
+       460: 000000000002fdd0    18 FUNC    GLOBAL DEFAULT   14 _ZN42_$LT$str$u20$as$u20$
+       461: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND writev@@GLIBC_2.2.5
+       462: 0000000000014fc0   525 FUNC    GLOBAL DEFAULT   14 _ZN91_$LT$std..sys_common
+       463: 0000000000031a50   149 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt3num53_$LT$im
+       464: 0000000000031db0   311 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt3num3imp52_$L
+       465: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND sigaction@@GLIBC_2.2.5
+       466: 00000000000319b0   149 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt3num53_$LT$im
+       467: 00000000000164a0    67 FUNC    GLOBAL DEFAULT   14 __rust_drop_panic
+       468: 00000000000231a0    22 FUNC    GLOBAL DEFAULT   14 _ZN11miniz_oxide7inflate4
+       469: 00000000000316a0   136 FUNC    GLOBAL DEFAULT   14 _ZN4core3num62_$LT$impl$u
+       470: 0000000000030130   291 FUNC    GLOBAL DEFAULT   14 _ZN4core5slice6memchr19me
+       471: 000000000002fd00     9 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt9Formatter15d
+       472: 000000000002e0d0     8 FUNC    GLOBAL DEFAULT   14 _ZN4core5panic9PanicInfo7
+       473: 0000000000000000     0 FUNC    WEAK   DEFAULT  UND __cxa_thread_atexit_impl@
+       474: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __xpg_strerror_r@@GLIBC_2
+       475: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND readlink@@GLIBC_2.2.5
+       476: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_GetRegionStart@@G
+       477: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND write@@GLIBC_2.2.5
+       478: 00000000000149e0   685 FUNC    GLOBAL DEFAULT   14 _ZN3std4path4Path13_strip
+       479: 000000000002dd90    18 FUNC    GLOBAL DEFAULT   14 _ZN5alloc6string104_$LT$i
+       480: 0000000000031a50   149 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt3num55_$LT$im
+       481: 000000000002f5e0  1712 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt9Formatter3pa
+       482: 00000000000317d0   146 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt3num52_$LT$im
+       483: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_GetTextRelBase@@G
+       484: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_RaiseException@@G
+       485: 0000000000041050     0 NOTYPE  GLOBAL DEFAULT   26 _edata
+       486: 000000000002edb0    11 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt10ArgumentV11
+       487: 00000000000325b0   293 FUNC    GLOBAL DEFAULT   14 _ZN4core7unicode12unicode
+       488: 0000000000041008     8 OBJECT  WEAK   HIDDEN    26 DW.ref.rust_eh_personalit
+       489: 0000000000028380  2955 FUNC    GLOBAL DEFAULT   14 _ZN71_$LT$rustc_demangle.
+       490: 0000000000041148     8 OBJECT  GLOBAL DEFAULT   27 _ZN3std9panicking11panic_
+       491: 0000000000006c50   101 FUNC    GLOBAL DEFAULT   14 _ZN4core6option13expect_f
+       492: 000000000002e020   162 FUNC    GLOBAL DEFAULT   14 _ZN84_$LT$core..char..Esc
+       493: 0000000000006d90    51 FUNC    GLOBAL DEFAULT   14 _ZN4core9panicking9panic_
+       494: 000000000002d910     9 FUNC    GLOBAL DEFAULT   14 _ZN14rustc_demangle8Deman
+       495: 0000000000032914     0 FUNC    GLOBAL HIDDEN    15 _fini
+       496: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND strlen@@GLIBC_2.2.5
+       497: 000000000002eb10    14 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt8builders9Deb
+       498: 0000000000012eb0   682 FUNC    GLOBAL DEFAULT   14 _ZN60_$LT$std..io..error.
+       499: 0000000000006d10   116 FUNC    GLOBAL DEFAULT   14 _ZN4core9panicking18panic
+       500: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND mmap@@GLIBC_2.2.5
+       501: 00000000000315e0   174 FUNC    GLOBAL DEFAULT   14 _ZN68_$LT$core..num..erro
+       502: 0000000000032900    19 FUNC    GLOBAL HIDDEN    14 fstat64
+       503: 0000000000007730     5 FUNC    GLOBAL DEFAULT   14 __rust_alloc
+       504: 000000000002db10   633 FUNC    GLOBAL DEFAULT   14 _ZN5alloc6string6String15
+       505: 00000000000324b0   220 FUNC    GLOBAL DEFAULT   14 _ZN64_$LT$core..str..erro
+       506: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_setspecific@@GLIB
+       507: 000000000002d920   153 FUNC    GLOBAL DEFAULT   14 _ZN63_$LT$rustc_demangle.
+       508: 0000000000031730   146 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt3num52_$LT$im
+       509: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_mutex_destroy@@GL
+       510: 0000000000006830    61 FUNC    GLOBAL DEFAULT   14 _ZN3std9panicking15begin_
+       511: 000000000002cb80  3375 FUNC    GLOBAL DEFAULT   14 _ZN14rustc_demangle8deman
+       512: 0000000000017400  1168 FUNC    GLOBAL DEFAULT   14 _ZN3std2rt19lang_start_in
+       513: 0000000000006f60   116 FUNC    GLOBAL DEFAULT   14 _ZN4core5slice5index22sli
+       514: 0000000000016e20    75 FUNC    GLOBAL DEFAULT   14 rust_begin_unwind
+       515: 00000000000260c0  1118 FUNC    GLOBAL DEFAULT   14 _ZN5adler7Adler3211write_
+       516: 0000000000032020   293 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt3num3imp54_$L
+       517: 0000000000022eb0   737 FUNC    GLOBAL DEFAULT   14 rust_eh_personality
+       518: 0000000000006e60   116 FUNC    GLOBAL DEFAULT   14 _ZN4core5slice5index26sli
+       519: 0000000000013e50   832 FUNC    GLOBAL DEFAULT   14 _ZN3std4path10Components7
+       520: 0000000000027e80   132 FUNC    GLOBAL DEFAULT   14 _ZN5gimli4read6abbrev12Ab
+       521: 0000000000022df0   128 FUNC    GLOBAL DEFAULT   14 __rust_start_panic
+       522: 0000000000007740     5 FUNC    GLOBAL DEFAULT   14 __rust_dealloc
+       523: 000000000002e0f0     5 FUNC    GLOBAL DEFAULT   14 _ZN4core5panic9PanicInfo8
+       524: 000000000002e620   422 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt8builders11De
+       525: 0000000000007760     5 FUNC    GLOBAL DEFAULT   14 __rust_alloc_zeroed
+       526: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND memset@@GLIBC_2.2.5
+       527: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND getcwd@@GLIBC_2.2.5
+       528: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_GetIPInfo@@GCC_4.
+       529: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND close@@GLIBC_2.2.5
+       530: 0000000000031910   146 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt3num53_$LT$im
+       531: 000000000002ee00   613 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt5write17h7aa6
+       532: 0000000000015f80   225 FUNC    GLOBAL DEFAULT   14 _ZN3std10sys_common16thre
+       533: 00000000000171d0   445 FUNC    GLOBAL DEFAULT   14 _ZN3std9panicking20rust_p
+       534: 0000000000012d00   423 FUNC    GLOBAL DEFAULT   14 _ZN3std2fs11OpenOptions5_
+       535: 000000000002d9f0   107 FUNC    GLOBAL DEFAULT   14 _ZN5alloc11collections5bt
+       536: 0000000000006ee0   116 FUNC    GLOBAL DEFAULT   14 _ZN4core5slice5index24sli
+       537: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_attr_getstack@@GL
+       538: 0000000000027f30   356 FUNC    GLOBAL DEFAULT   14 _ZN5gimli4read6abbrev10At
+       539: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_GetLanguageSpecif
+       540: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND memchr@@GLIBC_2.2.5
+       541: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __libc_start_main@@GLIBC_
+       542: 0000000000006270    11 FUNC    GLOBAL DEFAULT   14 _ZN3std7process5abort17h9
+       543: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __tls_get_addr@@GLIBC_2.3
+       544: 0000000000016f20   251 FUNC    GLOBAL DEFAULT   14 _ZN90_$LT$std..panicking.
+       545: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_rwlock_rdlock@@GL
+       546: 00000000000319b0   149 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt3num53_$LT$im
+       547: 0000000000026920   269 FUNC    GLOBAL DEFAULT   14 _ZN5gimli6common9SectionI
+       548: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND calloc@@GLIBC_2.2.5
+       549: 000000000002dfe0    26 FUNC    GLOBAL DEFAULT   14 _ZN60_$LT$core..cell..Bor
+       550: 000000000002fcb0    57 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt9Formatter9wr
+       551: 000000000002eb20    38 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt8builders9Deb
+       552: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __fxstat64@@GLIBC_2.2.5
+       553: 0000000000031690     5 FUNC    GLOBAL DEFAULT   14 _ZN4core3num21_$LT$impl$u
+       554: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND signal@@GLIBC_2.2.5
+       555: 000000000002fcb0    57 FUNC    GLOBAL DEFAULT   14 _ZN57_$LT$core..fmt..Form
+       556: 000000000002e360   690 FUNC    GLOBAL DEFAULT   14 _ZN68_$LT$core..fmt..buil
+       557: 0000000000007060    27 FUNC    GLOBAL DEFAULT   14 _ZN4core3str6traits23str_
+       558: 0000000000019380   226 FUNC    GLOBAL DEFAULT   14 _ZN79_$LT$std..backtrace_
+       559: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND syscall@@GLIBC_2.2.5
+       560: 000000000002fd20    23 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt9Formatter12d
+       561: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND __gmon_start__
+       562: 00000000000162f0    35 FUNC    GLOBAL DEFAULT   14 rust_oom
+       563: 0000000000041000     0 OBJECT  GLOBAL HIDDEN    26 __dso_handle
+       564: 0000000000031910   146 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt3num53_$LT$im
+       565: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND memcpy@@GLIBC_2.14
+       566: 0000000000014ec0   246 FUNC    GLOBAL DEFAULT   14 _ZN70_$LT$std..sync..once
+       567: 000000000002fc90    17 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt9Formatter9wr
+       568: 000000000002e020   162 FUNC    GLOBAL DEFAULT   14 _ZN82_$LT$core..char..Esc
+       569: 0000000000026530    53 FUNC    GLOBAL DEFAULT   14 _ZN6object4read4util11Str
+       570: 0000000000018ff0    71 FUNC    GLOBAL DEFAULT   14 _ZN3std3sys4unix17decode_
+       571: 0000000000031240   271 FUNC    GLOBAL DEFAULT   14 _ZN66_$LT$core..str..loss
+       572: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_GetIP@@GCC_3.0
+       573: 0000000000007770     5 FUNC    GLOBAL DEFAULT   14 __rust_alloc_error_handle
+       574: 0000000000030dc0     7 FUNC    GLOBAL DEFAULT   14 _ZN4core3str5lossy9Utf8Lo
+       575: 0000000000006ba0    12 FUNC    GLOBAL DEFAULT   14 _ZN5alloc5alloc18handle_a
+       576: 0000000000012a00   468 FUNC    GLOBAL DEFAULT   14 _ZN3std3env11current_dir1
+       577: 0000000000017020   148 FUNC    GLOBAL DEFAULT   14 _ZN90_$LT$std..panicking.
+       578: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_getspecific@@GLIB
+       579: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_mutex_unlock@@GLI
+       580: 0000000000032880   101 FUNC    GLOBAL DEFAULT   14 __libc_csu_init
+       581: 0000000000030260   605 FUNC    GLOBAL DEFAULT   14 _ZN4core3str8converts9fro
+       582: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND malloc@@GLIBC_2.2.5
+       583: 0000000000031a50   149 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt3num53_$LT$im
+       584: 0000000000031ef0   293 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt3num3imp52_$L
+       585: 0000000000041218     0 NOTYPE  GLOBAL DEFAULT   27 _end
+       586: 0000000000012be0   274 FUNC    GLOBAL DEFAULT   14 _ZN3std3ffi5c_str7CString
+       587: 0000000000007490    47 FUNC    GLOBAL DEFAULT   14 _start
+       588: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND bcmp@@GLIBC_2.2.5
+       589: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_rwlock_unlock@@GL
+       590: 000000000002e110   129 FUNC    GLOBAL DEFAULT   14 _ZN60_$LT$core..panic..Lo
+       591: 0000000000007080  1038 FUNC    GLOBAL DEFAULT   14 _ZN4core3str16slice_error
+       592: 000000000002f070  1308 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt9Formatter12p
+       593: 00000000000319b0   149 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt3num55_$LT$im
+       594: 0000000000017fd0   106 FUNC    GLOBAL DEFAULT   14 _ZN62_$LT$std..ffi..c_str
+       595: 0000000000030050   220 FUNC    GLOBAL DEFAULT   14 _ZN43_$LT$char$u20$as$u20
+       596: 000000000002e0e0     5 FUNC    GLOBAL DEFAULT   14 _ZN4core5panic9PanicInfo7
+       597: 00000000000304c0  2290 FUNC    GLOBAL DEFAULT   14 _ZN4core3str7pattern11Str
+       598: 000000000002fcf0     9 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt9Formatter9al
+       599: 0000000000032590    18 FUNC    GLOBAL DEFAULT   14 _ZN4core7unicode12unicode
+       600: 0000000000026520     7 FUNC    GLOBAL DEFAULT   14 _ZN6object4read4util11Str
+       601: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND realloc@@GLIBC_2.2.5
+       602: 0000000000030dd0     7 FUNC    GLOBAL DEFAULT   14 _ZN4core3str5lossy9Utf8Lo
+       603: 000000000002e000    26 FUNC    GLOBAL DEFAULT   14 _ZN63_$LT$core..cell..Bor
+       604: 000000000002fd10     9 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt9Formatter15d
+       605: 0000000000041050     0 NOTYPE  GLOBAL DEFAULT   27 __bss_start
+       606: 0000000000027f10    30 FUNC    GLOBAL DEFAULT   14 _ZN5gimli4read6abbrev10At
+       607: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND munmap@@GLIBC_2.2.5
+       608: 0000000000007590    21 FUNC    GLOBAL DEFAULT   14 main
+       609: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_key_create@@GLIBC
+       610: 000000000002fdf0   599 FUNC    GLOBAL DEFAULT   14 _ZN41_$LT$char$u20$as$u20
+       611: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_GetDataRelBase@@G
+       612: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND poll@@GLIBC_2.2.5
+       613: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_SetGR@@GCC_3.0
+       614: 000000000002fdb0    17 FUNC    GLOBAL DEFAULT   14 _ZN57_$LT$core..fmt..Form
+       615: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND open64@@GLIBC_2.2.5
+       616: 0000000000018ea0     8 FUNC    GLOBAL DEFAULT   14 _ZN64_$LT$std..sys..unix.
+       617: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND memmove@@GLIBC_2.2.5
+       618: 00000000000164f0    67 FUNC    GLOBAL DEFAULT   14 __rust_foreign_exception
+       619: 0000000000032020   293 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt3num3imp52_$L
+       620: 00000000000319b0   149 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt3num55_$LT$im
+       621: 000000000002d8b0    83 FUNC    GLOBAL DEFAULT   14 _ZN14rustc_demangle12try_
+       622: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_self@@GLIBC_2.2.5
+       623: 000000000002daf0    31 FUNC    GLOBAL DEFAULT   14 _ZN5alloc7raw_vec17capaci
+       624: 0000000000026600   275 FUNC    GLOBAL DEFAULT   14 _ZN9addr2line9path_push17
+       625: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND mprotect@@GLIBC_2.2.5
+       626: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND open@@GLIBC_2.2.5
+       627: 00000000000327b0   199 FUNC    GLOBAL HIDDEN    14 __umodti3
+       628: 0000000000023d20  9112 FUNC    GLOBAL DEFAULT   14 _ZN11miniz_oxide7inflate4
+       629: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND sysconf@@GLIBC_2.2.5
+       630: 0000000000006cc0    79 FUNC    GLOBAL DEFAULT   14 _ZN4core9panicking5panic1
+       631: 0000000000018e30    92 FUNC    GLOBAL DEFAULT   14 _ZN64_$LT$std..sys..unix.
+       632: 000000000002eb10    14 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt8builders8Deb
+       633: 0000000000018dd0    95 FUNC    GLOBAL DEFAULT   14 _ZN64_$LT$std..sys..unix.
+       634: 00000000000170c0    75 FUNC    GLOBAL DEFAULT   14 _ZN93_$LT$std..panicking.
+       635: 0000000000015c40   503 FUNC    GLOBAL DEFAULT   14 _ZN3std10sys_common11thre
+       636: 0000000000022da0    74 FUNC    GLOBAL DEFAULT   14 __rust_panic_cleanup
+       637: 000000000002e100     4 FUNC    GLOBAL DEFAULT   14 _ZN4core5panic8Location6c
+       638: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_attr_destroy@@GLI
+       639: 000000000002fc90    17 FUNC    GLOBAL DEFAULT   14 _ZN57_$LT$core..fmt..Form
+       640: 000000000002e1a0   448 FUNC    GLOBAL DEFAULT   14 _ZN4core9panicking19asser
+       641: 00000000000280a0    64 FUNC    GLOBAL DEFAULT   14 _ZN75_$LT$gimli..read..ab
+       642: 000000000002fd40    61 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt9Formatter11d
+       643: 0000000000028f10  1273 FUNC    GLOBAL DEFAULT   14 _ZN64_$LT$rustc_demangle.
+       644: 0000000000030de0  1105 FUNC    GLOBAL DEFAULT   14 _ZN96_$LT$core..str..loss
+       645: 0000000000031870   146 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt3num53_$LT$im
+       646: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_key_delete@@GLIBC
+       647: 0000000000014420  1460 FUNC    GLOBAL DEFAULT   14 _ZN80_$LT$std..path..Comp
+       648: 0000000000006dd0   133 FUNC    GLOBAL DEFAULT   14 _ZN4core6result13unwrap_f
+       649: 0000000000041050     0 OBJECT  GLOBAL HIDDEN    26 __TMC_END__
+       650: 0000000000026a30    44 FUNC    GLOBAL DEFAULT   14 _ZN5gimli4read6abbrev13Ab
+       651: 00000000000076d0     1 FUNC    GLOBAL HIDDEN    14 _ZN4core3ptr85drop_in_pla
+       652: 0000000000006fe0   116 FUNC    GLOBAL DEFAULT   14 _ZN4core5slice29_$LT$impl
+       653: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND posix_memalign@@GLIBC_2.2
+       654: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _ITM_registerTMCloneTable
+       655: 0000000000018ea0     8 FUNC    GLOBAL DEFAULT   14 _ZN64_$LT$std..sys..unix.
+       656: 000000000002e820   335 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt8builders10De
+       657: 000000000002e7d0    78 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt8builders11De
+       658: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_DeleteException@@
+       659: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND sigaltstack@@GLIBC_2.2.5
+       660: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND dlsym@@GLIBC_2.2.5
+       661: 0000000000006790   159 FUNC    GLOBAL DEFAULT   14 _ZN3std9panicking3try7cle
+       662: 0000000000007750     5 FUNC    GLOBAL DEFAULT   14 __rust_realloc
+       663: 0000000000007650    25 FUNC    GLOBAL HIDDEN    14 _ZN4core3ops8function6FnO
+       664: 0000000000017110    11 FUNC    GLOBAL DEFAULT   14 _ZN93_$LT$std..panicking.
+       665: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_Resume@@GCC_3.0
+       666: 0000000000012850   424 FUNC    GLOBAL DEFAULT   14 _ZN3std6thread6Thread3new
+       667: 00000000000316a0   136 FUNC    GLOBAL DEFAULT   14 _ZN4core3num60_$LT$impl$u
+       668: 000000000002fd80    35 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt9Formatter10d
+       669: 00000000000326e0   202 FUNC    GLOBAL HIDDEN    14 __udivti3
+       670: 0000000000000000     0 FUNC    WEAK   DEFAULT  UND __cxa_finalize@@GLIBC_2.2
+       671: 000000000002e970   117 FUNC    GLOBAL DEFAULT   14 _ZN4core3fmt8builders10De
+       672: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_mutex_lock@@GLIBC
+       673: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_SetIP@@GCC_3.0
+    
+    File: libsum.rlib(sum.sum.3a1fbbbh-cgu.0.rcgu.o)
+    
+    Symbol table '.symtab' contains 4 entries:
+       Num:    Value          Size Type    Bind   Vis      Ndx Name
+         0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+         1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS sum.3a1fbbbh-cgu.0
+         2: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 
+         3: 0000000000000000    24 FUNC    GLOBAL HIDDEN     5 _ZN49_$LT$usize$u20$as$u2
+    
+    File: libsum.rlib(sum.sum.3a1fbbbh-cgu.1.rcgu.o)
+    
+    Symbol table '.symtab' contains 4 entries:
+       Num:    Value          Size Type    Bind   Vis      Ndx Name
+         0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+         1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS sum.3a1fbbbh-cgu.1
+         2: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 
+         3: 0000000000000000    15 FUNC    GLOBAL HIDDEN     5 _ZN4core3cmp5impls57_$LT$
+    
+    File: libsum.rlib(sum.sum.3a1fbbbh-cgu.2.rcgu.o)
+    
+    Symbol table '.symtab' contains 6 entries:
+       Num:    Value          Size Type    Bind   Vis      Ndx Name
+         0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+         1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS sum.3a1fbbbh-cgu.2
+         2: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 
+         3: 0000000000000000     0 SECTION LOCAL  DEFAULT    6 
+         4: 0000000000000000    46 FUNC    GLOBAL DEFAULT    5 _ZN4core3ptr4read17h970db
+         5: 0000000000000000    14 FUNC    GLOBAL DEFAULT    6 _ZN4core3ptr5write17hde06
+    
+    File: libsum.rlib(sum.sum.3a1fbbbh-cgu.3.rcgu.o)
+    
+    Symbol table '.symtab' contains 10 entries:
+       Num:    Value          Size Type    Bind   Vis      Ndx Name
+         0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+         1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS sum.3a1fbbbh-cgu.3
+         2: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 
+         3: 0000000000000000     0 SECTION LOCAL  DEFAULT    7 
+         4: 0000000000000000     0 NOTYPE  GLOBAL HIDDEN   UND _ZN49_$LT$usize$u20$as$u2
+         5: 0000000000000000     0 NOTYPE  GLOBAL HIDDEN   UND _ZN4core3cmp5impls57_$LT$
+         6: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND _ZN4core3mem7replace17hd8
+         7: 0000000000000000   139 FUNC    GLOBAL DEFAULT    5 _ZN4core4iter5range101_$L
+         8: 0000000000000000     0 NOTYPE  GLOBAL HIDDEN   UND _ZN4core5clone5impls54_$L
+         9: 0000000000000000     7 FUNC    GLOBAL DEFAULT    7 _ZN63_$LT$I$u20$as$u20$co
+    
+    File: libsum.rlib(sum.sum.3a1fbbbh-cgu.4.rcgu.o)
+    
+    Symbol table '.symtab' contains 17 entries:
+       Num:    Value          Size Type    Bind   Vis      Ndx Name
+         0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+         1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS sum.3a1fbbbh-cgu.4
+         2: 0000000000000000    28 OBJECT  LOCAL  DEFAULT   12 str.0
+         3: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 
+         4: 0000000000000000     0 SECTION LOCAL  DEFAULT    7 
+         5: 0000000000000000     0 SECTION LOCAL  DEFAULT    9 
+         6: 0000000000000000     0 SECTION LOCAL  DEFAULT   10 
+         7: 0000000000000000     0 SECTION LOCAL  DEFAULT   12 
+         8: 0000000000000000     0 SECTION LOCAL  DEFAULT   13 
+         9: 0000000000000000     0 SECTION LOCAL  DEFAULT   15 
+        10: 0000000000000000    53 FUNC    GLOBAL DEFAULT    5 _ZN3sum4suma17h06aac0d327
+        11: 0000000000000000   278 FUNC    GLOBAL DEFAULT    7 _ZN3sum9sumatoria17h4fb7d
+        12: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND _ZN4core4iter5range101_$L
+        13: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND _ZN4core5slice29_$LT$impl
+        14: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND _ZN4core9panicking18panic
+        15: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND _ZN4core9panicking5panic1
+        16: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND _ZN63_$LT$I$u20$as$u20$co
+    
+    File: libsum.rlib(sum.sum.3a1fbbbh-cgu.5.rcgu.o)
+    
+    Symbol table '.symtab' contains 4 entries:
+       Num:    Value          Size Type    Bind   Vis      Ndx Name
+         0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+         1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS sum.3a1fbbbh-cgu.5
+         2: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 
+         3: 0000000000000000     4 FUNC    GLOBAL HIDDEN     5 _ZN4core5clone5impls54_$L
+    
+    File: libsum.rlib(sum.sum.3a1fbbbh-cgu.6.rcgu.o)
+    
+    Symbol table '.symtab' contains 4 entries:
+       Num:    Value          Size Type    Bind   Vis      Ndx Name
+         0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+         1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS sum.3a1fbbbh-cgu.6
+         2: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 
+         3: 0000000000000000    16 FUNC    GLOBAL DEFAULT    5 _ZN4core5slice29_$LT$impl
+    
+    File: libsum.rlib(sum.sum.3a1fbbbh-cgu.7.rcgu.o)
+    
     Symbol table '.symtab' contains 11 entries:
-    Num:    Value          Size Type    Bind   Vis      Ndx Name
-      0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
-      1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS functions.c
-      2: 0000000000000000     0 SECTION LOCAL  DEFAULT    1 
-      3: 0000000000000000     0 SECTION LOCAL  DEFAULT    2 
-      4: 0000000000000000     0 SECTION LOCAL  DEFAULT    3 
-      5: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 
-      6: 0000000000000000     0 SECTION LOCAL  DEFAULT    6 
-      7: 0000000000000000     0 SECTION LOCAL  DEFAULT    7 
-      8: 0000000000000000     0 SECTION LOCAL  DEFAULT    4 
-      9: 0000000000000000    24 FUNC    GLOBAL DEFAULT    1 suma
-     10: 0000000000000018    73 FUNC    GLOBAL DEFAULT    1 sumatoria
-
+       Num:    Value          Size Type    Bind   Vis      Ndx Name
+         0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+         1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS sum.3a1fbbbh-cgu.7
+         2: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT    7 GCC_except_table0
+         3: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 
+         4: 0000000000000000     0 SECTION LOCAL  DEFAULT    7 
+         5: 0000000000000000     8 OBJECT  WEAK   HIDDEN     9 DW.ref.rust_eh_personalit
+         6: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND _Unwind_Resume
+         7: 0000000000000000   136 FUNC    GLOBAL DEFAULT    5 _ZN4core3mem7replace17hd8
+         8: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND _ZN4core3ptr4read17h970db
+         9: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND _ZN4core3ptr5write17hde06
+        10: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND rust_eh_personality
+    
+    File: libsum.rlib(lib.rmeta)
+    
+    Symbol table '.dynsym' contains 15 entries:
+       Num:    Value          Size Type    Bind   Vis      Ndx Name
+         0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+         1: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _ITM_deregisterTMCloneTab
+         2: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_GetRegionStart@GCC_3.0 (2)
+         3: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_GetTextRelBase@GCC_3.0 (2)
+         4: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_GetIPInfo@GCC_4.2.0 (3)
+         5: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_GetLanguageSpecif@GCC_3.0 (2)
+         6: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND __gmon_start__
+         7: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_mutex_unlock@GLIBC_2.2.5 (4)
+         8: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_GetDataRelBase@GCC_3.0 (2)
+         9: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_SetGR@GCC_3.0 (2)
+        10: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _ITM_registerTMCloneTable
+        11: 0000000000000000     0 FUNC    WEAK   DEFAULT  UND __cxa_finalize@GLIBC_2.2.5 (5)
+        12: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_mutex_lock@GLIBC_2.2.5 (4)
+        13: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_SetIP@GCC_3.0 (2)
+        14: 0000000000001310   737 FUNC    GLOBAL DEFAULT   11 rust_eh_personality
+    
+    Symbol table '.symtab' contains 81 entries:
+       Num:    Value          Size Type    Bind   Vis      Ndx Name
+         0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+         1: 0000000000000238     0 SECTION LOCAL  DEFAULT    1 
+         2: 0000000000000260     0 SECTION LOCAL  DEFAULT    2 
+         3: 0000000000000288     0 SECTION LOCAL  DEFAULT    3 
+         4: 00000000000003f0     0 SECTION LOCAL  DEFAULT    4 
+         5: 000000000000057a     0 SECTION LOCAL  DEFAULT    5 
+         6: 0000000000000598     0 SECTION LOCAL  DEFAULT    6 
+         7: 0000000000000608     0 SECTION LOCAL  DEFAULT    7 
+         8: 0000000000001000     0 SECTION LOCAL  DEFAULT    8 
+         9: 0000000000001020     0 SECTION LOCAL  DEFAULT    9 
+        10: 0000000000001030     0 SECTION LOCAL  DEFAULT   10 
+        11: 0000000000001040     0 SECTION LOCAL  DEFAULT   11 
+        12: 00000000000015f4     0 SECTION LOCAL  DEFAULT   12 
+        13: 0000000000002000     0 SECTION LOCAL  DEFAULT   13 
+        14: 0000000000002058     0 SECTION LOCAL  DEFAULT   14 
+        15: 00000000000020b8     0 SECTION LOCAL  DEFAULT   15 
+        16: 0000000000003d18     0 SECTION LOCAL  DEFAULT   16 
+        17: 0000000000003d28     0 SECTION LOCAL  DEFAULT   17 
+        18: 0000000000003d30     0 SECTION LOCAL  DEFAULT   18 
+        19: 0000000000003d90     0 SECTION LOCAL  DEFAULT   19 
+        20: 0000000000003f80     0 SECTION LOCAL  DEFAULT   20 
+        21: 0000000000004000     0 SECTION LOCAL  DEFAULT   21 
+        22: 0000000000004008     0 SECTION LOCAL  DEFAULT   22 
+        23: 0000000000000000     0 SECTION LOCAL  DEFAULT   23 
+        24: 0000000000000000     0 SECTION LOCAL  DEFAULT   24 
+        25: 0000000000000000     0 SECTION LOCAL  DEFAULT   25 
+        26: 0000000000000000     0 SECTION LOCAL  DEFAULT   26 
+        27: 0000000000000000     0 SECTION LOCAL  DEFAULT   27 
+        28: 0000000000000000     0 SECTION LOCAL  DEFAULT   28 
+        29: 0000000000000000     0 SECTION LOCAL  DEFAULT   29 
+        30: 0000000000000000     0 SECTION LOCAL  DEFAULT   30 
+        31: 0000000000000000     0 SECTION LOCAL  DEFAULT   31 
+        32: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS crtstuff.c
+        33: 0000000000001040     0 FUNC    LOCAL  DEFAULT   11 deregister_tm_clones
+        34: 0000000000001070     0 FUNC    LOCAL  DEFAULT   11 register_tm_clones
+        35: 00000000000010b0     0 FUNC    LOCAL  DEFAULT   11 __do_global_dtors_aux
+        36: 0000000000004008     1 OBJECT  LOCAL  DEFAULT   22 completed.8060
+        37: 0000000000003d28     0 OBJECT  LOCAL  DEFAULT   17 __do_global_dtors_aux_fin
+        38: 00000000000010f0     0 FUNC    LOCAL  DEFAULT   11 frame_dummy
+        39: 0000000000003d20     0 OBJECT  LOCAL  DEFAULT   16 __frame_dummy_init_array_
+        40: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS std.9m6hw7w6-cgu.0
+        41: 0000000000001100    55 FUNC    LOCAL  DEFAULT   11 _ZN3std3sys4unix4args3imp
+        42: 0000000000003d18     8 OBJECT  LOCAL  DEFAULT   16 _ZN3std3sys4unix4args3imp
+        43: 0000000000004010     8 OBJECT  LOCAL  DEFAULT   22 _ZN3std3sys4unix4args3imp
+        44: 0000000000004018     8 OBJECT  LOCAL  DEFAULT   22 _ZN3std3sys4unix4args3imp
+        45: 0000000000004020    40 OBJECT  LOCAL  DEFAULT   22 _ZN3std3sys4unix4args3imp
+        46: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS panic_unwind.b34o5za4-cgu
+        47: 0000000000001170   381 FUNC    LOCAL  DEFAULT   11 _ZN12panic_unwind5dwarf2e
+        48: 00000000000012f0    12 FUNC    LOCAL  DEFAULT   11 _ZN12panic_unwind8real_im
+        49: 0000000000001300    12 FUNC    LOCAL  DEFAULT   11 _ZN12panic_unwind8real_im
+        50: 0000000000001140    12 FUNC    LOCAL  DEFAULT   11 _ZN4core3ops8function6FnO
+        51: 0000000000001150    12 FUNC    LOCAL  DEFAULT   11 _ZN4core3ops8function6FnO
+        52: 0000000000001160     1 FUNC    LOCAL  DEFAULT   11 _ZN4core3ptr88drop_in_pla
+        53: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS 1yafyrf2uaakrs3o
+        54: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS crtstuff.c
+        55: 000000000000222c     0 OBJECT  LOCAL  DEFAULT   15 __FRAME_END__
+        56: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS rustc_demangle.axzg541g-c
+        57: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS alloc.bdtv0pny-cgu.0
+        58: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS core.2eb9xv2h-cgu.0
+        59: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS 
+        60: 00000000000015f4     0 FUNC    LOCAL  DEFAULT   12 _fini
+        61: 0000000000004000     0 OBJECT  LOCAL  DEFAULT   21 __dso_handle
+        62: 0000000000003d90     0 OBJECT  LOCAL  DEFAULT   19 _DYNAMIC
+        63: 0000000000002058     0 NOTYPE  LOCAL  DEFAULT   14 __GNU_EH_FRAME_HDR
+        64: 0000000000004008     0 OBJECT  LOCAL  DEFAULT   21 __TMC_END__
+        65: 0000000000003f80     0 OBJECT  LOCAL  DEFAULT   20 _GLOBAL_OFFSET_TABLE_
+        66: 0000000000001000     0 FUNC    LOCAL  DEFAULT    8 _init
+        67: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _ITM_deregisterTMCloneTab
+        68: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_GetRegionStart@@G
+        69: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_GetTextRelBase@@G
+        70: 0000000000001310   737 FUNC    GLOBAL DEFAULT   11 rust_eh_personality
+        71: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_GetIPInfo@@GCC_4.
+        72: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_GetLanguageSpecif
+        73: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND __gmon_start__
+        74: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_mutex_unlock@@GLI
+        75: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_GetDataRelBase@@G
+        76: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_SetGR@@GCC_3.0
+        77: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _ITM_registerTMCloneTable
+        78: 0000000000000000     0 FUNC    WEAK   DEFAULT  UND __cxa_finalize@@GLIBC_2.2
+        79: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_mutex_lock@@GLIBC
+        80: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _Unwind_SetIP@@GCC_3.0
+    
 Nota varias cosas interesantes:
 
 * La dirección asociada a los símbolos suma y sumatoria es relativa a 0. Esto ocurrirá
   con cada relocatable object file. Por tanto será responsabilidad del enlazador ubicar
   los símbolos en una dirección apropiada una vez se mezclen los archivos para formar
   el ejecutable.
-* Hay algunos símbolos marcados como LOCAL y otros GLOBAL. Nota que suma y sumatoria
-  son GLOBAL, por tanto estarán visibles al momento de combinarlos con otros relocatable
+* Hay algunos símbolos marcados como LOCAL y otros GLOBAL. GLOBAL indica que son visibles al momento de combinarlos con otros relocatable
   object files.
 
 Ya hemos dicho en varias oportunidades que los relocatable object files incluyen
@@ -1638,51 +2619,132 @@ el código de máquina del programa. Lo puedes observar con el siguientes comand
 
 .. code-block:: bash
 
-    functions.o:     file format elf64-x86-64
+    libsum.so:     file format elf64-x86-64
 
+
+    Disassembly of section .init:
+
+    0000000000001000 <_init>:
+        1000:	f3 0f 1e fa          	endbr64 
+        1004:	48 83 ec 08          	sub    $0x8,%rsp
+        1008:	48 8b 05 b1 2f 00 00 	mov    0x2fb1(%rip),%rax        # 3fc0 <__gmon_start__>
+        100f:	48 85 c0             	test   %rax,%rax
+        1012:	74 02                	je     1016 <_init+0x16>
+        1014:	ff d0                	callq  *%rax
+        1016:	48 83 c4 08          	add    $0x8,%rsp
+        101a:	c3                   	retq   
+
+    Disassembly of section .plt:
+
+    0000000000001020 <.plt>:
+        1020:	ff 35 62 2f 00 00    	pushq  0x2f62(%rip)        # 3f88 <_GLOBAL_OFFSET_TABLE_+0x8>
+        1026:	ff 25 64 2f 00 00    	jmpq   *0x2f64(%rip)        # 3f90 <_GLOBAL_OFFSET_TABLE_+0x10>
+        102c:	0f 1f 40 00          	nopl   0x0(%rax)
+
+    Disassembly of section .plt.got:
+
+    0000000000001030 <__cxa_finalize@plt>:
+        1030:	ff 25 b2 2f 00 00    	jmpq   *0x2fb2(%rip)        # 3fe8 <__cxa_finalize@GLIBC_2.2.5>
+        1036:	66 90                	xchg   %ax,%ax
 
     Disassembly of section .text:
 
-    0000000000000000 <suma>:
-        0:	f3 0f 1e fa          	endbr64 
-        4:	55                   	push   %rbp
-        5:	48 89 e5             	mov    %rsp,%rbp
-        8:	89 7d fc             	mov    %edi,-0x4(%rbp)
-        b:	89 75 f8             	mov    %esi,-0x8(%rbp)
-        e:	8b 55 fc             	mov    -0x4(%rbp),%edx
-        11:	8b 45 f8             	mov    -0x8(%rbp),%eax
-        14:	01 d0                	add    %edx,%eax
-        16:	5d                   	pop    %rbp
-        17:	c3                   	retq   
+    0000000000001040 <deregister_tm_clones>:
+        1040:	48 8d 3d c1 2f 00 00 	lea    0x2fc1(%rip),%rdi        # 4008 <completed.8060>
+        1047:	48 8d 05 ba 2f 00 00 	lea    0x2fba(%rip),%rax        # 4008 <completed.8060>
+        104e:	48 39 f8             	cmp    %rdi,%rax
+        1051:	74 15                	je     1068 <deregister_tm_clones+0x28>
+        1053:	48 8b 05 3e 2f 00 00 	mov    0x2f3e(%rip),%rax        # 3f98 <_ITM_deregisterTMCloneTable>
+        105a:	48 85 c0             	test   %rax,%rax
+        105d:	74 09                	je     1068 <deregister_tm_clones+0x28>
+        105f:	ff e0                	jmpq   *%rax
+        1061:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+        1068:	c3                   	retq   
+        1069:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
 
-    0000000000000018 <sumatoria>:
-        18:	f3 0f 1e fa          	endbr64 
-        1c:	55                   	push   %rbp
-        1d:	48 89 e5             	mov    %rsp,%rbp
-        20:	48 89 7d e8          	mov    %rdi,-0x18(%rbp)
-        24:	89 75 e4             	mov    %esi,-0x1c(%rbp)
-        27:	c7 45 f8 00 00 00 00 	movl   $0x0,-0x8(%rbp)
-        2e:	c7 45 fc 00 00 00 00 	movl   $0x0,-0x4(%rbp)
-        35:	eb 1d                	jmp    54 <sumatoria+0x3c>
-        37:	8b 45 fc             	mov    -0x4(%rbp),%eax
-        3a:	48 98                	cltq   
-        3c:	48 8d 14 85 00 00 00 	lea    0x0(,%rax,4),%rdx
-        43:	00 
-        44:	48 8b 45 e8          	mov    -0x18(%rbp),%rax
-        48:	48 01 d0             	add    %rdx,%rax
-        4b:	8b 00                	mov    (%rax),%eax
-        4d:	01 45 f8             	add    %eax,-0x8(%rbp)
-        50:	83 45 fc 01          	addl   $0x1,-0x4(%rbp)
-        54:	8b 45 fc             	mov    -0x4(%rbp),%eax
-        57:	3b 45 e4             	cmp    -0x1c(%rbp),%eax
-        5a:	7c db                	jl     37 <sumatoria+0x1f>
-        5c:	8b 45 f8             	mov    -0x8(%rbp),%eax
-        5f:	5d                   	pop    %rbp
-        60:	c3                   	retq 
+    0000000000001070 <register_tm_clones>:
+        1070:	48 8d 3d 91 2f 00 00 	lea    0x2f91(%rip),%rdi        # 4008 <completed.8060>
+        1077:	48 8d 35 8a 2f 00 00 	lea    0x2f8a(%rip),%rsi        # 4008 <completed.8060>
+        107e:	48 29 fe             	sub    %rdi,%rsi
+        1081:	48 89 f0             	mov    %rsi,%rax
+        1084:	48 c1 ee 3f          	shr    $0x3f,%rsi
+        1088:	48 c1 f8 03          	sar    $0x3,%rax
+        108c:	48 01 c6             	add    %rax,%rsi
+        108f:	48 d1 fe             	sar    %rsi
+        1092:	74 14                	je     10a8 <register_tm_clones+0x38>
+        1094:	48 8b 05 45 2f 00 00 	mov    0x2f45(%rip),%rax        # 3fe0 <_ITM_registerTMCloneTable>
+        109b:	48 85 c0             	test   %rax,%rax
+        109e:	74 08                	je     10a8 <register_tm_clones+0x38>
+        10a0:	ff e0                	jmpq   *%rax
+        10a2:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
+        10a8:	c3                   	retq   
+        10a9:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+
+    00000000000010b0 <__do_global_dtors_aux>:
+        10b0:	f3 0f 1e fa          	endbr64 
+        10b4:	80 3d 4d 2f 00 00 00 	cmpb   $0x0,0x2f4d(%rip)        # 4008 <completed.8060>
+        10bb:	75 2b                	jne    10e8 <__do_global_dtors_aux+0x38>
+        10bd:	55                   	push   %rbp
+        10be:	48 83 3d 22 2f 00 00 	cmpq   $0x0,0x2f22(%rip)        # 3fe8 <__cxa_finalize@GLIBC_2.2.5>
+        10c5:	00 
+        10c6:	48 89 e5             	mov    %rsp,%rbp
+        10c9:	74 0c                	je     10d7 <__do_global_dtors_aux+0x27>
+        10cb:	48 8b 3d 2e 2f 00 00 	mov    0x2f2e(%rip),%rdi        # 4000 <__dso_handle>
+        10d2:	e8 59 ff ff ff       	callq  1030 <__cxa_finalize@plt>
+        10d7:	e8 64 ff ff ff       	callq  1040 <deregister_tm_clones>
+        10dc:	c6 05 25 2f 00 00 01 	movb   $0x1,0x2f25(%rip)        # 4008 <completed.8060>
+        10e3:	5d                   	pop    %rbp
+        10e4:	c3                   	retq   
+        10e5:	0f 1f 00             	nopl   (%rax)
+        10e8:	c3                   	retq   
+        10e9:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+
+    00000000000010f0 <frame_dummy>:
+        10f0:	f3 0f 1e fa          	endbr64 
+        10f4:	e9 77 ff ff ff       	jmpq   1070 <register_tm_clones>
+        10f9:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+
+    0000000000001100 <_ZN3std3sys4unix4args3imp15ARGV_INIT_ARRAY12init_wrapper17h9bae8a0cafc2b6ccE>:
+        1100:	41 57                	push   %r15
+        1102:	41 56                	push   %r14
+        1104:	53                   	push   %rbx
+        1105:	49 89 f7             	mov    %rsi,%r15
+        1108:	48 63 df             	movslq %edi,%rbx
+        110b:	4c 8d 35 0e 2f 00 00 	lea    0x2f0e(%rip),%r14        # 4020 <_ZN3std3sys4unix4args3imp4LOCK17h600045dca3348f0eE>
+        1112:	4c 89 f7             	mov    %r14,%rdi
+        1115:	ff 15 d5 2e 00 00    	callq  *0x2ed5(%rip)        # 3ff0 <pthread_mutex_lock@GLIBC_2.2.5>
+        111b:	48 89 1d ee 2e 00 00 	mov    %rbx,0x2eee(%rip)        # 4010 <_ZN3std3sys4unix4args3imp4ARGC17h393a33c6be9e9b3bE>
+        1122:	4c 89 3d ef 2e 00 00 	mov    %r15,0x2eef(%rip)        # 4018 <_ZN3std3sys4unix4args3imp4ARGV17h5274ca72b78295baE>
+        1129:	4c 89 f7             	mov    %r14,%rdi
+        112c:	5b                   	pop    %rbx
+        112d:	41 5e                	pop    %r14
+        112f:	41 5f                	pop    %r15
+        1131:	ff 25 91 2e 00 00    	jmpq   *0x2e91(%rip)        # 3fc8 <pthread_mutex_unlock@GLIBC_2.2.5>
+        1137:	66 0f 1f 84 00 00 00 	nopw   0x0(%rax,%rax,1)
+        113e:	00 00 
+
+    0000000000001140 <_ZN4core3ops8function6FnOnce40call_once$u7b$$u7b$vtable.shim$u7d$$u7d$17h0318dffd3a9d1c14E>:
+        1140:	48 8b 07             	mov    (%rdi),%rax
+        1143:	48 8b 38             	mov    (%rax),%rdi
+        1146:	ff 25 84 2e 00 00    	jmpq   *0x2e84(%rip)        # 3fd0 <_Unwind_GetDataRelBase@GCC_3.0>
+        114c:	0f 1f 40 00          	nopl   0x0(%rax)
+
+    0000000000001150 <_ZN4core3ops8function6FnOnce40call_once$u7b$$u7b$vtable.shim$u7d$$u7d$17h3dfb55efa1414d46E>:
+        1150:	48 8b 07             	mov    (%rdi),%rax
+        1153:	48 8b 38             	mov    (%rax),%rdi
+        1156:	ff 25 4c 2e 00 00    	jmpq   *0x2e4c(%rip)        # 3fa8 <_Unwind_GetTextRelBase@GCC_3.0>
+        115c:	0f 1f 40 00          	nopl   0x0(%rax)
+
+    ...
 
 Recuerdas cuando programaste en ensamblador? Mira de nuevo el código anterior.
 Ahí tienes código ensamblador y su equivalente código de máquina para
 el procesador de tu computador.
+
+No tiene mucho sentido analizar los símbolos y aprender de linking con
+los resultados de un programa de Rust pues no son fáciles de entender, los 
+próximos ejemplos serán en C, que no hace name mangling, para que podamos ver más fácilmente los cambios
+del programa reflejados en los símbolos.
 
 Ahora vamos a realizar otro ejemplo donde verás cómo se combinan varios
 relocatable object files para producir un ejecutable:
@@ -2151,7 +3213,7 @@ y podrás ver que en esa dirección efectivamente está la función ``_start``
 Ejercicio 38
 ^^^^^^^^^^^^^^
 
-Ya viste que en C es posible incluir en el proceso de enlazado bibliotecas estáticas
+Ya viste que tanto en C como Rust es posible incluir en el proceso de enlazado bibliotecas estáticas
 y dinámicas. Ahora la idea es ver cómo las puedes incluir. Antes de ver esto, debemos
 revisar algunos conceptos. Sabes qué es el Application binary interface (ABI)?
 
